@@ -1,0 +1,212 @@
+:root {
+  --bg: #0d1117;
+  --card: #161b22;
+  --text: #e6edf3;
+  --secondary: #8b949e;
+  --accent: #1d9bf0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f8fa;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.tweet {
+  background: var(--card);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,.4);
+  display: flex;
+  gap: .75rem;
+  position: relative;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.handle {
+  font-weight: 600;
+}
+
+.timestamp {
+  color: var(--secondary);
+  font-size: .85rem;
+  margin-left: .25rem;
+}
+
+.body {
+  margin: .5rem 0;
+  white-space: pre-wrap;
+  cursor: pointer;
+}
+
+.media-thumb {
+  margin-top: .5rem;
+  border-radius: .75rem;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 1.5rem;
+  font-size: .9rem;
+}
+
+.actions button {
+  background: none;
+  border: none;
+  color: var(--secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+}
+
+.actions button.liked,
+.actions button.retweeted {
+  color: var(--accent);
+}
+
+.reply-box textarea {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--secondary);
+  color: var(--text);
+  border-radius: .5rem;
+  padding: .5rem;
+}
+
+.reply-box .controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  margin-top: .25rem;
+}
+
+.focus-header {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.sidebar {
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  width: 200px;
+  background: var(--card);
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,.4);
+}
+
+.hashtag {
+  color: var(--accent);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.overlay img,
+.overlay video {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 1rem;
+}
+
+.poll {
+  background: var(--card);
+  padding: 1rem;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+}
+
+.poll button {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: .5rem 1rem;
+  border-radius: .5rem;
+  margin-right: .5rem;
+  cursor: pointer;
+}
+
+.social-media-simulator {
+  max-width: 600px;
+  margin: 20px auto;
+  background: #fff;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.comment {
+  border-bottom: 1px solid #e1e8ed;
+  padding: 10px 0;
+}
+
+.engagement-icons {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.engagement-icons button {
+  background: none;
+  border: none;
+  color: #657786;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.engagement-icons button.active {
+  color: #1da1f2;
+}
+
+.reply-form {
+  margin-top: 10px;
+}
+
+.reply-form input {
+  width: calc(100% - 60px);
+  padding: 5px;
+  margin-right: 5px;
+}
+
+.replies {
+  margin-left: 20px;
+  border-left: 2px solid #e1e8ed;
+  padding-left: 10px;
+  margin-top: 10px;
+}
