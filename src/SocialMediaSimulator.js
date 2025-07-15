@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Heart, MessageCircle, Repeat2, Share, MoreHorizontal, User, Clock, CheckCircle } from 'lucide-react';
 
 const SocialMediaSimulator = () => {
@@ -21,17 +21,45 @@ const SocialMediaSimulator = () => {
   const [postEngagement, setPostEngagement] = useState({});
   const [userEngagement, setUserEngagement] = useState({});
 
+  // Add comment engagement tracking
+  const [commentEngagement, setCommentEngagement] = useState({});
+  const [userCommentEngagement, setUserCommentEngagement] = useState({});
+
+
   // Crime case data (based on real case patterns but fictionalized)
-  const crimeCase = {
-    defendant: "Alex Morgan",
-    victim: "Jordan Riley",
-    crime: "assault during a protest",
-    location: "downtown area",
-    age: 23
-  };
+  const crimeCase = useMemo(() => ({
+  defendant: "Alex Morgan",
+  victim: "Jordan Riley",
+  crime: "assault during a protest",
+  location: "downtown area",
+  age: 23
+}), []);
+
+  // Track user interactions
+  const recordInteraction = useCallback((action, postId, details = {}) => {
+    const interaction = {
+      timestamp: Date.now(),
+      action,
+      postId,
+      details,
+      condition: condition
+    };
+    
+    setParticipantData(prev => ({
+      ...prev,
+      interactions: [...prev.interactions, interaction]
+    }));
+  }, [condition]);
+
+  const recordPostView = useCallback((postId) => {
+    setParticipantData(prev => ({
+      ...prev,
+      viewedPosts: [...prev.viewedPosts, { postId, timestamp: Date.now() }]
+    }));
+  }, []);
 
   // Generate posts based on experimental condition
-  const generatePosts = () => {
+  const generatePosts = useCallback(() => {
     const baseEngagement = condition.engagement === 'high' 
       ? { likes: 2847, retweets: 892, comments: 445 }
       : { likes: 34, retweets: 12, comments: 7 };
@@ -154,32 +182,14 @@ const SocialMediaSimulator = () => {
     };
 
     return framingOptions[condition.valence];
-  };
+  }, [condition, crimeCase]);
 
-  const [posts, setPosts] = useState(generatePosts());
+  const [posts, setPosts] = useState(() => generatePosts());
 
-  // Track user interactions
-  const recordInteraction = (action, postId, details = {}) => {
-    const interaction = {
-      timestamp: Date.now(),
-      action,
-      postId,
-      details,
-      condition: condition
-    };
-    
-    setParticipantData(prev => ({
-      ...prev,
-      interactions: [...prev.interactions, interaction]
-    }));
-  };
-
-  const recordPostView = (postId) => {
-    setParticipantData(prev => ({
-      ...prev,
-      viewedPosts: [...prev.viewedPosts, { postId, timestamp: Date.now() }]
-    }));
-  };
+  // Update posts when condition changes
+  useEffect(() => {
+    setPosts(generatePosts());
+  }, [generatePosts]);
 
   // Handle engagement actions
   const handleLike = (postId) => {
@@ -256,17 +266,22 @@ const SocialMediaSimulator = () => {
   }, []);
 
   // Post component
-  const PostComponent = ({ post, onView }) => {
+  const PostComponent = ({ post }) => {
     const [isVisible, setIsVisible] = useState(false);
     const currentEngagement = postEngagement[post.id] || {};
     const userActions = userEngagement[post.id] || {};
 
+    const handlePostView = useCallback(() => {
+  if (!participantData.viewedPosts.find(v => v.postId === post.id)) {
+    recordPostView(post.id);
+  }
+}, [post.id, recordPostView]);
+
     useEffect(() => {
-      if (isVisible && !participantData.viewedPosts.find(v => v.postId === post.id)) {
-        recordPostView(post.id);
-        if (onView) onView(post.id);
+      if (isVisible) {
+        handlePostView();
       }
-    }, [isVisible, post.id]);
+    }, [isVisible, handlePostView]);
 
     return (
       <div 
@@ -418,9 +433,7 @@ const SocialMediaSimulator = () => {
             <select 
               value={condition.valence} 
               onChange={(e) => {
-                const newCondition = { ...condition, valence: e.target.value };
-                setCondition(newCondition);
-                setPosts(generatePosts());
+                setCondition({ ...condition, valence: e.target.value });
               }}
               className="w-full p-2 border border-yellow-300 rounded"
             >
@@ -436,9 +449,7 @@ const SocialMediaSimulator = () => {
             <select 
               value={condition.engagement} 
               onChange={(e) => {
-                const newCondition = { ...condition, engagement: e.target.value };
-                setCondition(newCondition);
-                setPosts(generatePosts());
+                setCondition({ ...condition, engagement: e.target.value });
               }}
               className="w-full p-2 border border-yellow-300 rounded"
             >
