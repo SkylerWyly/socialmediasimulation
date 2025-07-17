@@ -1,4 +1,4 @@
-# Social Media Crime Simulator
+# Social Media Simulator
 
 A React-based social media interface simulator for research purposes, designed to study how different framings of criminal justice content affect user engagement and perception.
 
