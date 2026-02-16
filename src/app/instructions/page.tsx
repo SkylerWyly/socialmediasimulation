@@ -1,42 +1,82 @@
+
 'use client';
 
-import { useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { assignCondition } from '@/lib/conditions';
-import { setCondition } from '@/lib/data-logger';
+import { Loader2 } from 'lucide-react';
+import { db } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 
-const conditions = [
-  'sympathetic-high', 'sympathetic-low',
-  'condemning-high', 'condemning-low',
-  'neutral-high', 'neutral-low'
-];
+// Helper function for Box-Muller transform to get a normally distributed random number
+const boxMullerTransform = (): [number, number] => {
+  let u1 = 0, u2 = 0;
+  // Convert [0,1) to (0,1)
+  while (u1 === 0) u1 = Math.random();
+  while (u2 === 0) u2 = Math.random();
+  const z1 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+  const z2 = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
+  return [z1, z2];
+};
+
+// Generates a random number from a Gaussian distribution, clamped to a min/max
+const generateGaussian = (mean: number, stdDev: number, min: number, max: number): number => {
+  const [z1] = boxMullerTransform();
+  const value = z1 * stdDev + mean;
+  return Math.max(min, Math.min(Math.round(value), max));
+};
+
+const VALENCE_CONDITIONS = ["sympathetic", "condemning", "neutral"];
 
 export default function InstructionsPage() {
-  const isDevMode = process.env.NODE_ENV === 'development';
+  const router = useRouter();
+  const [participantId, setParticipantId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Automatically assign and log condition if not in dev mode
-    if (!isDevMode && !localStorage.getItem('participantCondition')) {
-      const assignedCondition = assignCondition();
-      if(assignedCondition) {
-        setCondition(assignedCondition);
-      }
-    }
-  }, [isDevMode]);
+    // Read participantId from localStorage on the client
+    const id = localStorage.getItem('participantId');
+    setParticipantId(id);
+  }, []);
 
-  const handleConditionChange = (condition: string) => {
-    if (isDevMode) {
-      try {
-        localStorage.setItem('participantCondition', condition);
-        setCondition(condition);
-        console.log('Manually set condition to:', condition);
-      } catch (error) {
-        console.error('Failed to set participant condition:', error);
-      }
+  const assignConditionsAndStart = async () => {
+    if (!participantId) {
+      alert("Error: Participant ID not found. Please start over.");
+      return;
+    }
+    setIsSubmitting(true);
+
+    try {
+      // 1. Assign Valence Condition
+      const valenceCondition = VALENCE_CONDITIONS[Math.floor(Math.random() * VALENCE_CONDITIONS.length)];
+
+      // 2. Generate Engagement Stats using Gaussian distribution
+      const engagementStats = {
+        postLikes: generateGaussian(530000, 150000, 80000, 980000),
+        postReposts: generateGaussian(30000, 5000, 15000, 45000),
+        commentLikes: generateGaussian(7500, 2500, 0, 15000),
+        commentReposts: generateGaussian(1000, 333, 0, 2000),
+      };
+
+      // 3. Generate a unique session ID
+      const sessionId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+      // 4. Save to Firebase
+      const participantRef = doc(db, 'participants', participantId);
+      await updateDoc(participantRef, {
+        valenceCondition,
+        engagementStats,
+        sessionId,
+      });
+
+      // 5. Navigate to the simulation page
+      router.push('/simulation');
+
+    } catch (error) {
+      console.error("Failed to assign conditions and update Firebase:", error);
+      alert("An error occurred while starting the simulation. Please try again.");
+      setIsSubmitting(false);
     }
   };
 
@@ -49,36 +89,26 @@ export default function InstructionsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p>
-            You will now be taken to a tutorial section with a simulated social media feed.
-            You are encouraged to interact with the content as you normally would on any social media platform to familiarize yourself with the features.
+            You will now be taken to a simulated social media feed. Your task is to browse the feed and interact with the content as you normally would.
           </p>
           <p>
-            You can like posts, share them, and add comments or replies. 
-            After you've had a chance to try things out, a button will appear to start the main experiment.
+            You can like, comment on, and share posts. Please engage with the content naturally for the duration of the session.
           </p>
-          <p>Click the "Begin Tutorial" button below when you are ready to begin.</p>
-          
-          {isDevMode && (
-            <Card className="mt-6 bg-muted/50 p-4">
-              <h3 className="font-bold text-lg mb-2">Development Controls</h3>
-              <p className="text-sm text-muted-foreground mb-4">Select a condition to test. This panel is only visible in development mode.</p>
-              <RadioGroup onValueChange={handleConditionChange}>
-                <div className="grid grid-cols-2 gap-4">
-                  {conditions.map(condition => (
-                    <div key={condition} className="flex items-center space-x-2">
-                      <RadioGroupItem value={condition} id={condition} />
-                      <Label htmlFor={condition} className="capitalize font-normal">{condition.replace('-', ' ')}</Label>
-                    </div>
-                  ))}
-                </div>
-              </RadioGroup>
-            </Card>
-          )}
+          <p>
+            Click the "Start Simulation" button below when you are ready to begin.
+          </p>
         </CardContent>
         <CardFooter>
-          <Link href="/tutorial" passHref>
-            <Button size="lg">Begin Tutorial</Button>
-          </Link>
+          <Button size="lg" onClick={assignConditionsAndStart} disabled={isSubmitting || !participantId}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Starting...
+              </>
+            ) : (
+              "Start Simulation"
+            )}
+          </Button>
         </CardFooter>
       </Card>
     </div>

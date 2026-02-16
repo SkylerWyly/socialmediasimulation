@@ -1,9 +1,9 @@
-
 'use client';
 
+import { db } from '@/lib/firebase';
+import { doc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -12,38 +12,70 @@ import { initializeParticipant } from '@/lib/data-logger';
 
 export function ConsentPageContent() {
   const [consentGiven, setConsentGiven] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
-    // List of possible query parameter keys for participant IDs
     const idKeys = ['id', 'PROLIFIC_PID', 'participantId'];
     let participantId: string | null = null;
 
     for (const key of idKeys) {
       if (searchParams.has(key)) {
         participantId = searchParams.get(key);
-        break; // Stop at the first key found
+        break;
       }
     }
     
-    // In development mode, if no ID is found, generate a random one.
     if (!participantId && process.env.NODE_ENV === 'development') {
         participantId = `dev_${Math.random().toString(36).substring(2, 9)}`;
-        console.log(`Development mode: using generated participant ID ${participantId}`);
     }
 
     if (participantId) {
       try {
+        // Local persistence
         localStorage.setItem('participantId', participantId);
         initializeParticipant(participantId);
-        console.log(`Participant ID ${participantId} saved and logger initialized.`);
+
+        // Firebase: Log initial arrival
+        setDoc(doc(db, 'participants', participantId), {
+          participantId: participantId,
+          status: 'landed_on_consent',
+          consented: false,
+          landedAt: serverTimestamp(),
+          valenceCondition: 'not_assigned',
+          engagementCondition: 'not_assigned'
+        }, { merge: true });
+
+        console.log(`Participant ID ${participantId} initialized in Firebase.`);
       } catch (error) {
-        console.error('Failed to save participant ID or initialize logger:', error);
+        console.error('Initialization error:', error);
       }
-    } else {
-      console.log('No participant ID found in URL.');
     }
   }, [searchParams]);
+
+  const handleContinue = async () => {
+    const participantId = localStorage.getItem('participantId');
+    if (!participantId) return;
+
+    setIsSubmitting(true);
+    try {
+      // Update Firebase to confirm consent before moving on
+      await updateDoc(doc(db, 'participants', participantId), {
+        status: 'consented',
+        consented: true,
+        consentedAt: serverTimestamp()
+      });
+      
+      // Navigate to the pre-survey
+      router.push('/survey-pre');
+    } catch (error) {
+      console.error("Error saving consent:", error);
+      setIsSubmitting(false);
+      // Fallback: move forward anyway if Firebase fails, so we don't lose the participant
+      router.push('/survey-pre');
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -73,7 +105,7 @@ export function ConsentPageContent() {
               onCheckedChange={(checked) => setConsentGiven(checked as boolean)}
             />
             <div className="grid gap-1.5 leading-none">
-              <Label htmlFor="terms1" className="font-bold">
+              <Label htmlFor="terms1" className="font-bold cursor-pointer">
                 I have read and understood the information above.
               </Label>
               <p className="text-sm text-muted-foreground">
@@ -83,9 +115,12 @@ export function ConsentPageContent() {
           </div>
         </CardContent>
         <CardFooter>
-          <Link href="/survey-pre">
-            <Button disabled={!consentGiven}>Agree & Continue</Button>
-          </Link>
+          <Button 
+            disabled={!consentGiven || isSubmitting} 
+            onClick={handleContinue}
+          >
+            {isSubmitting ? "Saving..." : "Agree & Continue"}
+          </Button>
         </CardFooter>
       </Card>
     </div>
