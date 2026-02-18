@@ -15,6 +15,11 @@ import { mockUsers } from '@/lib/mock-data';
 import { Separator } from './ui/separator';
 import { logEvent } from '@/lib/data-logger';
 
+// --- NEW IMPORTS ---
+import { db } from '@/lib/firebase';
+import { doc, updateDoc, increment } from 'firebase/firestore';
+// -------------------
+
 interface PostCardProps {
   post: Post;
   onUpdatePost: (post: Post) => void;
@@ -28,6 +33,9 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
   const [comments, setComments] = useState<CommentType[]>(post.comments);
   const [isFocusModalOpen, setIsFocusModalOpen] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
+
+  // Helper to get ID safely
+  const getParticipantId = () => localStorage.getItem('participantId');
 
   useEffect(() => {
     if (isFocusModalOpen) {
@@ -70,6 +78,15 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
     setLikeCount(newLikeCount);
     onUpdatePost({ ...post, likes: newLikeCount, isLikedByUser: newLikedState });
     triggerInteraction('like');
+
+    // --- FIREBASE LOGGING ---
+    const pid = getParticipantId();
+    if (pid) {
+      updateDoc(doc(db, 'participants', pid), {
+        [`interactions.${post.id}.liked`]: newLikedState,
+        totalLikes: increment(newLikedState ? 1 : -1)
+      }).catch(e => console.error(e));
+    }
   };
 
   const handleShare = () => {
@@ -78,6 +95,14 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
       onUpdatePost({ ...post, shares: post.shares + 1 });
       setIsShared(true);
       triggerInteraction('share');
+
+      // --- FIREBASE LOGGING ---
+      const pid = getParticipantId();
+      if (pid) {
+        updateDoc(doc(db, 'participants', pid), {
+          [`interactions.${post.id}.reposted`]: true
+        }).catch(e => console.error(e));
+      }
     }
   };
   
@@ -100,7 +125,16 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
         content: content,
         isFocal: !!post.isFocal,
         valence: post.valence
-    })
+    });
+
+    // --- FIREBASE LOGGING ---
+    const pid = getParticipantId();
+    if (pid) {
+      updateDoc(doc(db, 'participants', pid), {
+        [`interactions.${post.id}.commented`]: true,
+        [`interactions.${post.id}.commentContent`]: content
+      }).catch(e => console.error(e));
+    }
   };
   
   const handleAddReply = (commentId: string, content: string) => {
@@ -142,7 +176,16 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
         content: content,
         isFocal: !!post.isFocal,
         valence: post.valence
-    })
+    });
+
+    // --- FIREBASE LOGGING ---
+    const pid = getParticipantId();
+    if (pid) {
+      updateDoc(doc(db, 'participants', pid), {
+        [`interactions.${post.id}.replied`]: true,
+        [`interactions.${post.id}.replyContent`]: content
+      }).catch(e => console.error(e));
+    }
   };
 
   const interactionButtons = (

@@ -10,7 +10,9 @@ import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
-import { logEvent } from '@/lib/data-logger';
+// Firebase Imports
+import { db } from '@/lib/firebase';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function SurveyPostPage() {
   const router = useRouter();
@@ -18,6 +20,7 @@ export default function SurveyPostPage() {
   
   const [responses, setResponses] = useState<Record<string, string | number>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const likertQuestions = [
     { id: 'q1-post', text: 'To what extent do you agree with the opinions expressed in the posts you saw?' },
@@ -34,20 +37,10 @@ export default function SurveyPostPage() {
   
   const handleResponseChange = (questionId: string, value: string) => {
     setResponses(prev => ({ ...prev, [questionId]: value }));
-    logEvent('survey_response', {
-        page: 'survey-post-1',
-        questionId: questionId,
-        response: value
-    });
   };
 
   const handleSliderChange = (value: number[]) => {
     setResponses(prev => ({ ...prev, 'slider1-post': value[0] }));
-     logEvent('survey_response', {
-        page: 'survey-post-1',
-        questionId: 'slider1-post',
-        response: value[0]
-    });
   };
 
   const isFormComplete = () => {
@@ -56,16 +49,40 @@ export default function SurveyPostPage() {
     return answeredLikert && answeredSlider;
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     setSubmitted(true);
-    if (isFormComplete()) {
-      router.push('/survey-post-2');
-    } else {
+    
+    if (!isFormComplete()) {
       toast({
         title: "Incomplete Form",
         description: "Please answer all questions before continuing.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Save to Firebase
+    const participantId = localStorage.getItem('participantId');
+    if (participantId) {
+        setIsSaving(true);
+        try {
+            await updateDoc(doc(db, 'participants', participantId), {
+                surveyPost: responses,
+                surveyPostCompletedAt: serverTimestamp()
+            });
+            
+            // --- REDIRECT UPDATE ---
+            // Send user to the final redirect page which handles the Qualtrics handoff
+            router.push('/redirect'); 
+            
+        } catch (error) {
+            console.error("Error saving survey:", error);
+            setIsSaving(false);
+            toast({ title: "Error", description: "Could not save responses. Please try again." });
+        }
+    } else {
+        // Fallback if ID is missing (dev mode)
+        router.push('/redirect');
     }
   };
 
@@ -73,14 +90,18 @@ export default function SurveyPostPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-3xl shadow-lg">
         <CardHeader>
-          <CardTitle>Post-Study Survey (1 of 2)</CardTitle>
-          <CardDescription className="text-base text-foreground">Please answer the following questions based on your experience in the study.</CardDescription>
+          <CardTitle>Post-Study Survey</CardTitle>
+          <CardDescription className="text-base text-foreground">
+            Please answer the following questions based on your experience in the study.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
             <div className="space-y-6">
                 {likertQuestions.map((question) => (
                 <div key={question.id}>
-                    <Label className={cn("font-semibold text-lg", submitted && !responses[question.id] && "text-destructive")}>{question.text}</Label>
+                    <Label className={cn("font-semibold text-lg", submitted && !responses[question.id] && "text-destructive")}>
+                        {question.text}
+                    </Label>
                     <RadioGroup 
                         className="mt-4"
                         onValueChange={(value) => handleResponseChange(question.id, value)}
@@ -102,7 +123,9 @@ export default function SurveyPostPage() {
             <Separator />
 
             <div>
-                <Label htmlFor="slider1-post" className={cn("font-semibold text-lg", submitted && responses['slider1-post'] === undefined && "text-destructive")}>How engaging did you find the social media feed?</Label>
+                <Label htmlFor="slider1-post" className={cn("font-semibold text-lg", submitted && responses['slider1-post'] === undefined && "text-destructive")}>
+                    How engaging did you find the social media feed?
+                </Label>
                 <div className="mt-4">
                 <Slider
                     id="slider1-post"
@@ -121,7 +144,9 @@ export default function SurveyPostPage() {
             </div>
         </CardContent>
         <CardFooter>
-            <Button size="lg" onClick={handleContinue}>Continue</Button>
+            <Button size="lg" onClick={handleContinue} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Submit & Finish"}
+            </Button>
         </CardFooter>
       </Card>
     </div>

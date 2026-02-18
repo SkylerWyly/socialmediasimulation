@@ -17,6 +17,7 @@ export function ConsentPageContent() {
   const router = useRouter();
 
   useEffect(() => {
+    // 1. Capture IDs from all major recruitment platforms
     const idKeys = ['id', 'PROLIFIC_PID', 'participantId'];
     let participantId: string | null = null;
 
@@ -27,14 +28,26 @@ export function ConsentPageContent() {
       }
     }
     
+    // Development fallback
     if (!participantId && process.env.NODE_ENV === 'development') {
         participantId = `dev_${Math.random().toString(36).substring(2, 9)}`;
     }
 
     if (participantId) {
       try {
-        // Local persistence
+        // Store primary ID
         localStorage.setItem('participantId', participantId);
+        
+        // Platform-specific storage for redirect handoff
+        if (searchParams.has('id')) localStorage.setItem('id', searchParams.get('id')!);
+        if (searchParams.has('PROLIFIC_PID')) localStorage.setItem('PROLIFIC_PID', searchParams.get('PROLIFIC_PID')!);
+        if (searchParams.has('STUDY_ID')) localStorage.setItem('STUDY_ID', searchParams.get('STUDY_ID')!);
+        if (searchParams.has('SESSION_ID')) localStorage.setItem('SESSION_ID', searchParams.get('SESSION_ID')!);
+        
+        // CloudResearch Connect specific IDs
+        if (searchParams.has('projectId')) localStorage.setItem('projectId', searchParams.get('projectId')!);
+        if (searchParams.has('assignmentId')) localStorage.setItem('assignmentId', searchParams.get('assignmentId')!);
+
         initializeParticipant(participantId);
 
         // Firebase: Log initial arrival
@@ -47,7 +60,6 @@ export function ConsentPageContent() {
           engagementCondition: 'not_assigned'
         }, { merge: true });
 
-        console.log(`Participant ID ${participantId} initialized in Firebase.`);
       } catch (error) {
         console.error('Initialization error:', error);
       }
@@ -60,20 +72,18 @@ export function ConsentPageContent() {
 
     setIsSubmitting(true);
     try {
-      // Update Firebase to confirm consent before moving on
       await updateDoc(doc(db, 'participants', participantId), {
         status: 'consented',
         consented: true,
         consentedAt: serverTimestamp()
       });
       
-      // Navigate to the pre-survey
-      router.push('/survey-pre');
+      router.push('/instructions');
     } catch (error) {
       console.error("Error saving consent:", error);
       setIsSubmitting(false);
-      // Fallback: move forward anyway if Firebase fails, so we don't lose the participant
-      router.push('/survey-pre');
+      // Fallback: move forward anyway
+      router.push('/instructions');
     }
   };
 
