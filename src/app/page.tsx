@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 import { Suspense } from 'react';
 import { ConsentPageContent } from '@/components/consent-page-content';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
