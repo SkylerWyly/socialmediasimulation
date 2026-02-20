@@ -14,38 +14,54 @@ import { CommentForm } from '@/components/comment-form';
 import { mockUsers } from '@/lib/mock-data';
 import { Separator } from './ui/separator';
 import { logEvent } from '@/lib/data-logger';
+import { cn } from '@/lib/utils'; 
 
-// --- NEW IMPORTS ---
+// --- FIREBASE IMPORTS ---
 import { db } from '@/lib/firebase';
-import { doc, updateDoc, increment } from 'firebase/firestore';
-// -------------------
+import { doc, updateDoc, increment, arrayUnion } from 'firebase/firestore';
 
 interface PostCardProps {
   post: Post;
   onUpdatePost: (post: Post) => void;
+  // Added qualitative function to prop interface
+  onPostComment?: (postId: string, text: string, targetId?: string) => void;
 }
 
-export function PostCard({ post, onUpdatePost }: PostCardProps) {
+export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
   const { toast } = useToast();
   const [isLiked, setIsLiked] = useState(post.isLikedByUser || false);
-  const [isShared, setIsShared] = useState(false);
+  const [isShared, setIsShared] = useState(post.isSharedByUser || false);
   const [likeCount, setLikeCount] = useState(post.likes);
+  
+  const [repostCount, setRepostCount] = useState(post.shares);
+  const [repostDisplay, setRepostDisplay] = useState(post.sharesDisplay);
+
   const [comments, setComments] = useState<CommentType[]>(post.comments);
   const [isFocusModalOpen, setIsFocusModalOpen] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
 
-  // Helper to get ID safely
   const getParticipantId = () => localStorage.getItem('participantId');
 
+  // --- DwellTime & ViewedComments Tracking ---
   useEffect(() => {
+    const pid = getParticipantId();
     if (isFocusModalOpen) {
       setStartTime(Date.now());
+      if (pid && db) {
+        updateDoc(doc(db, 'participants', pid), {
+          [`interactions.${post.id}.viewedComments`]: true
+        }).catch(e => console.error(e));
+      }
     } else if (startTime) {
       const duration = Date.now() - startTime;
       logEvent('focus_post', { postId: post.id, durationMs: duration, isFocal: !!post.isFocal });
+      if (pid && db) {
+        updateDoc(doc(db, 'participants', pid), {
+          [`interactions.${post.id}.dwellTimes`]: arrayUnion(duration) 
+        }).catch(e => console.error(e));
+      }
       setStartTime(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFocusModalOpen, post.id, post.isFocal]);
 
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
@@ -57,18 +73,6 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
       isFocal: !!post.isFocal,
       valence: post.valence
     });
-    try {
-      const interactedPostsJSON = localStorage.getItem('interactedPosts');
-      const interactedPosts: string[] = interactedPostsJSON ? JSON.parse(interactedPostsJSON) : [];
-      
-      if (!interactedPosts.includes(post.id)) {
-        interactedPosts.push(post.id);
-        localStorage.setItem('interactedPosts', JSON.stringify(interactedPosts));
-        window.dispatchEvent(new Event('storage'));
-      }
-    } catch (error) {
-      console.error("Could not update localStorage for interactions", error);
-    }
   };
 
   const handleLike = () => {
@@ -76,12 +80,12 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
     setIsLiked(newLikedState);
     const newLikeCount = newLikedState ? likeCount + 1 : likeCount - 1;
     setLikeCount(newLikeCount);
+    
     onUpdatePost({ ...post, likes: newLikeCount, isLikedByUser: newLikedState });
     triggerInteraction('like');
 
-    // --- FIREBASE LOGGING ---
     const pid = getParticipantId();
-    if (pid) {
+    if (pid && db) {
       updateDoc(doc(db, 'participants', pid), {
         [`interactions.${post.id}.liked`]: newLikedState,
         totalLikes: increment(newLikedState ? 1 : -1)
@@ -91,14 +95,23 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
 
   const handleShare = () => {
     if (!isShared) {
-      toast({ title: 'Post Shared', description: 'This is a simulated action.' });
-      onUpdatePost({ ...post, shares: post.shares + 1 });
+      toast({ title: 'Post Shared', description: 'Simulated action recorded.', duration: 1500 });
+      
+      const newRepostCount = repostCount + 1;
       setIsShared(true);
+      setRepostCount(newRepostCount);
+      
+      if (repostDisplay && !repostDisplay.includes('K') && !repostDisplay.includes('M')) {
+          setRepostDisplay(newRepostCount.toString());
+      } else {
+          setRepostDisplay(post.sharesDisplay);
+      }
+
+      onUpdatePost({ ...post, isSharedByUser: true, shares: newRepostCount });
       triggerInteraction('share');
 
-      // --- FIREBASE LOGGING ---
       const pid = getParticipantId();
-      if (pid) {
+      if (pid && db) {
         updateDoc(doc(db, 'participants', pid), {
           [`interactions.${post.id}.reposted`]: true
         }).catch(e => console.error(e));
@@ -106,6 +119,7 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
     }
   };
   
+  // --- UPDATED: Discretized Comment Logic ---
   const handleAddComment = (content: string) => {
     const commentToAdd: CommentType = {
       id: `comment-${Date.now()}`,
@@ -119,24 +133,26 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
     setComments(updatedComments);
     onUpdatePost({ ...post, comments: updatedComments });
     triggerInteraction('comment');
-    logEvent('comment_added', {
-        postId: post.id,
-        commentId: commentToAdd.id,
-        content: content,
-        isFocal: !!post.isFocal,
-        valence: post.valence
-    });
 
-    // --- FIREBASE LOGGING ---
     const pid = getParticipantId();
-    if (pid) {
+    if (pid && db) {
+      // 1. Primary Save: Structured qualitative data object
       updateDoc(doc(db, 'participants', pid), {
-        [`interactions.${post.id}.commented`]: true,
-        [`interactions.${post.id}.commentContent`]: content
+        [`interactions.${post.id}.userComments`]: arrayUnion({
+          text: content.trim(),
+          target: 'post', // Identifies this was a top-level reply
+          timestamp: new Date().toISOString()
+        }),
+        // 2. Secondary Save: Standard boolean flags for counts
+        [`interactions.${post.id}.commented`]: true
       }).catch(e => console.error(e));
     }
+
+    // Call the optional feed-level function if passed
+    onPostComment?.(post.id, content, 'post');
   };
   
+  // --- UPDATED: Discretized Reply Logic ---
   const handleAddReply = (commentId: string, content: string) => {
     const newReply: CommentType = {
         id: `reply-${Date.now()}`,
@@ -147,19 +163,13 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
         replies: [],
     };
 
-    const addReplyToComment = (comments: CommentType[]): CommentType[] => {
-        return comments.map(comment => {
+    const addReplyToComment = (coms: CommentType[]): CommentType[] => {
+        return coms.map(comment => {
             if (comment.id === commentId) {
-                return {
-                    ...comment,
-                    replies: [...(comment.replies || []), newReply]
-                };
+                return { ...comment, replies: [...(comment.replies || []), newReply] };
             }
             if (comment.replies && comment.replies.length > 0) {
-                return {
-                    ...comment,
-                    replies: addReplyToComment(comment.replies)
-                };
+                return { ...comment, replies: addReplyToComment(comment.replies) };
             }
             return comment;
         });
@@ -169,23 +179,23 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
     setComments(updatedComments);
     onUpdatePost({ ...post, comments: updatedComments });
     triggerInteraction('reply');
-    logEvent('reply_added', {
-        postId: post.id,
-        parentCommentId: commentId,
-        replyId: newReply.id,
-        content: content,
-        isFocal: !!post.isFocal,
-        valence: post.valence
-    });
 
-    // --- FIREBASE LOGGING ---
     const pid = getParticipantId();
-    if (pid) {
+    if (pid && db) {
+      // 1. Primary Save: Structured qualitative data object for the specific reply
       updateDoc(doc(db, 'participants', pid), {
-        [`interactions.${post.id}.replied`]: true,
-        [`interactions.${post.id}.replyContent`]: content
+        [`interactions.${post.id}.userComments`]: arrayUnion({
+          text: content.trim(),
+          target: commentId, // Identifies exactly which comment they replied to
+          timestamp: new Date().toISOString()
+        }),
+        // 2. Secondary Save: Standard boolean flags for counts
+        [`interactions.${post.id}.replied`]: true
       }).catch(e => console.error(e));
     }
+
+    // Call the optional feed-level function if passed
+    onPostComment?.(post.id, content, commentId);
   };
 
   const interactionButtons = (
@@ -196,23 +206,25 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
         </Button>
         <Button 
           variant="ghost" 
-          className="flex-1 rounded-none h-12 text-muted-foreground hover:bg-accent/10 hover:text-accent disabled:cursor-not-allowed" 
+          className="flex-1 rounded-none h-12 text-muted-foreground hover:bg-accent/10 hover:text-accent" 
           onClick={(e) => { stopPropagation(e); handleShare(); }}
           disabled={isShared}
         >
-          <Repeat className={`h-5 w-5 mr-2 ${isShared ? 'text-primary' : ''}`} />
-          <span className={`${isShared ? 'text-primary' : ''}`}>{post.shares + (isShared && !post.isSharedByUser ? 1 : 0) - (post.isSharedByUser && !isShared ? 1 : 0) }</span>
+          <Repeat className={cn("h-5 w-5 mr-2", isShared && "text-primary")} />
+          <span className={cn(isShared && "text-primary")}>{repostDisplay}</span>
         </Button>
         <Button variant="ghost" className="flex-1 rounded-none h-12 text-muted-foreground hover:bg-primary/10" onClick={(e) => { stopPropagation(e); handleLike(); }}>
-          <Heart className={`h-5 w-5 mr-2 transition-colors ${isLiked ? 'fill-primary text-primary' : ''}`} />
-          <span className={`${isLiked ? 'text-primary' : ''}`}>{likeCount}</span>
+          <Heart className={cn("h-5 w-5 mr-2 transition-colors", isLiked && "fill-primary text-primary")} />
+          <span className={cn(isLiked && "text-primary")}>
+             {isLiked && likeCount > post.likes ? 'Liked' : post.likesDisplay}
+          </span>
         </Button>
       </div>
   );
 
   const PostBody = () => (
     <div className="flex items-start gap-4">
-      <Avatar><AvatarImage src={post.user.avatar} alt={post.user.name} data-ai-hint="person portrait" /><AvatarFallback><UserCircle /></AvatarFallback></Avatar>
+      <Avatar><AvatarImage src={post.user.avatar} alt={post.user.name} /><AvatarFallback><UserCircle /></AvatarFallback></Avatar>
       <div className="flex-1">
         <div className="flex items-center justify-between">
           <div>
@@ -222,16 +234,17 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={stopPropagation}><MoreHorizontal className="h-5 w-5" /></Button>
         </div>
         <p className="mt-2 whitespace-pre-wrap">{post.content}</p>
-        {post.image && (
-          <div className="mt-3 rounded-lg border overflow-hidden">
-            <Image 
-              src={post.image}
-              alt="Post image"
-              width={600}
-              height={400}
-              className="object-cover w-full"
-              data-ai-hint={post.imageHint}
-            />
+        
+        {post.images && post.images.length > 0 && (
+          <div className={cn(
+            "mt-3 rounded-xl border overflow-hidden grid gap-1",
+            post.images.length > 1 ? "grid-cols-2" : "grid-cols-1"
+          )}>
+            {post.images.map((src, idx) => (
+              <div key={idx} className="relative aspect-video bg-muted">
+                <Image src={src} alt={`Post content ${idx + 1}`} fill className="object-cover" sizes="(max-width: 768px) 100vw, 600px" />
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -243,8 +256,8 @@ export function PostCard({ post, onUpdatePost }: PostCardProps) {
       <PostBody />
       <div className="mt-4 flex justify-around border-t border-b py-2">
         <div className="text-center text-sm"><span className="font-bold">{comments.length}</span> <span className="text-muted-foreground">Comments</span></div>
-        <div className="text-center text-sm"><span className="font-bold">{post.shares}</span> <span className="text-muted-foreground">Shares</span></div>
-        <div className="text-center text-sm"><span className="font-bold">{likeCount}</span> <span className="text-muted-foreground">Likes</span></div>
+        <div className="text-center text-sm"><span className="font-bold">{repostDisplay}</span> <span className="text-muted-foreground">Shares</span></div>
+        <div className="text-center text-sm"><span className="font-bold">{isLiked && likeCount > post.likes ? 'Liked' : post.likesDisplay}</span> <span className="text-muted-foreground">Likes</span></div>
       </div>
       <div className="mt-4 space-y-4">
         <div className="space-y-4">

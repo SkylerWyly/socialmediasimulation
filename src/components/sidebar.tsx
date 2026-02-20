@@ -13,8 +13,9 @@ import { ThemeToggle } from './theme-toggle';
 import { formatDistanceToNow } from 'date-fns';
 import { useNotifications } from '@/context/notifications-context';
 
+// Updated menu items: Home is now flagged as static
 const menuItems = [
-  { icon: Home, text: 'Home', href: '/' },
+  { icon: Home, text: 'Home', isStatic: true }, 
   { icon: Hash, text: 'Explore', href: '#' },
   { icon: Bell, text: 'Notifications', href: '#', id: 'notifications' },
   { icon: Mail, text: 'Messages', href: '#' },
@@ -28,7 +29,7 @@ function NotificationItem({ notification }: { notification: Notification }) {
   return (
     <div className="flex items-start gap-3">
       <Avatar className="h-8 w-8">
-        <AvatarImage src={notification.user.avatar} alt={notification.user.name} data-ai-hint="person portrait" />
+        <AvatarImage src={notification.user.avatar} alt={notification.user.name} />
         <AvatarFallback><UserCircle /></AvatarFallback>
       </Avatar>
       <div className="flex-1">
@@ -58,7 +59,7 @@ export function Sidebar() {
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="relative flex items-center justify-start gap-3 p-3 h-auto text-base"
+          className="relative flex items-center justify-start gap-3 p-3 h-auto text-base w-full"
           onClick={handleNotificationsClick}
         >
           {hasNewNotification && (
@@ -93,14 +94,31 @@ export function Sidebar() {
     <div className="sticky top-14 h-[calc(100vh-3.5rem)] flex flex-col justify-between py-4 md:py-0">
       <nav className="flex flex-col gap-1">
         {menuItems.map((item) => {
+          // 1. Handle Notifications
           if (item.id === 'notifications') {
             return <div key={item.id}>{NotificationsPopover}</div>;
           }
+          
+          // 2. Handle the Disabled Home Button
+          if (item.isStatic) {
+            return (
+              <Button
+                key={item.text}
+                variant="ghost"
+                className="flex items-center justify-start gap-3 p-3 h-auto font-bold text-base cursor-default opacity-70 hover:bg-transparent pointer-events-none"
+              >
+                <item.icon className="h-6 w-6" />
+                <span>{item.text}</span>
+              </Button>
+            );
+          }
+
+          // 3. Handle Regular Nav Items
           return (
-            <Link key={item.text} href={item.href} passHref>
+            <Link key={item.text} href={item.href || '#'} passHref className="w-full">
               <Button
                 variant="ghost"
-                className={`flex items-center justify-start gap-3 p-3 h-auto ${item.text === 'Home' ? 'font-bold text-base' : 'text-base'}`}
+                className="flex items-center justify-start gap-3 p-3 h-auto text-base w-full"
               >
                 <item.icon className="h-6 w-6" />
                 <span>{item.text}</span>
@@ -110,30 +128,31 @@ export function Sidebar() {
         })}
         <Button className="mt-4 rounded-full text-lg p-3 h-auto w-full">Post</Button>
       </nav>
+
       <div className="mt-auto">
         <div className="flex items-center justify-between p-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" className="w-full justify-start items-center p-0 rounded-full h-auto">
-                    <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                            <AvatarImage src={currentUser.avatar} alt={currentUser.name} data-ai-hint="person portrait" />
-                            <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="hidden lg:block text-left">
-                            <p className="font-bold text-sm">{currentUser.name}</p>
-                            <p className="text-muted-foreground text-sm">@{currentUser.username}</p>
-                        </div>
-                    </div>
-                    <MoreHorizontal className="h-5 w-5 ml-auto hidden lg:block" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-2">
-                  <Button variant="ghost" className="w-full justify-start">Add an existing account</Button>
-                  <Button variant="ghost" className="w-full justify-start">Log out @{currentUser.username}</Button>
-              </PopoverContent>
-            </Popover>
-            <ThemeToggle />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" className="w-full justify-start items-center p-0 rounded-full h-auto">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
+                    <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="hidden lg:block text-left">
+                    <p className="font-bold text-sm">{currentUser.name}</p>
+                    <p className="text-muted-foreground text-sm">@{currentUser.username}</p>
+                  </div>
+                </div>
+                <MoreHorizontal className="h-5 w-5 ml-auto hidden lg:block" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-2">
+              <Button variant="ghost" className="w-full justify-start">Add an existing account</Button>
+              <Button variant="ghost" className="w-full justify-start">Log out @{currentUser.username}</Button>
+            </PopoverContent>
+          </Popover>
+          <ThemeToggle />
         </div>
       </div>
     </div>

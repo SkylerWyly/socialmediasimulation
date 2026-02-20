@@ -25,14 +25,14 @@ export function TutorialCard() {
         </div>
         <div className="flex items-center gap-3">
           <Repeat className="h-5 w-5 text-muted-foreground" />
-          <p className="text-sm">Click the <strong>repeat icon</strong> to share a post.</p>
+          <p className="text-sm">Click the <strong>repost icon</strong> to share a post.</p>
         </div>
         <div className="flex items-center gap-3">
             <Bell className="h-5 w-5 text-muted-foreground" />
             <p className="text-sm">The <strong>bell icon</strong> in the sidebar will show notifications for new activity.</p>
         </div>
          <p className="text-sm text-muted-foreground pt-2">
-          When you're ready, the "Start Experiment" button will appear at the bottom-right of your screen.
+          When you're ready, the "Start" button will appear at the bottom-right of your screen.
         </p>
       </CardContent>
     </Card>

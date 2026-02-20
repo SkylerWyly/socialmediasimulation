@@ -10,27 +10,27 @@ export default function SimulationPage() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* ORIGINAL GRID LAYOUT RESTORED */}
+      {/* GRID LAYOUT FOR THE SIMULATION ENVIRONMENT */}
       <main className="container max-w-7xl mx-auto pt-6">
         <div className="grid grid-cols-1 md:grid-cols-10 gap-x-4">
           
-          {/* Left Sidebar */}
+          {/* Left Sidebar - Navigation and User Info */}
           <aside className="col-span-2 hidden md:block">
             <Sidebar />
           </aside>
           
           {/* Center Feed (Main Content) */}
           <div className="col-span-10 md:col-span-8 lg:col-span-5 border-x min-h-screen">
-            <div className="p-4 border-b bg-white/80 backdrop-blur sticky top-0 z-10">
-               <h2 className="text-xl font-bold">Home</h2>
-            </div>
+            {/* REMOVAL NOTE: The "Home" header block that was previously here has been removed 
+              to maximize visual space for the experimental stimuli and prevent navigation errors. 
+            */}
             
-            {/* The Feed handles the posts and the "Next Section" logic internally */}
+            {/* The Feed component handles posts p1-p8 and the "Next Section" logic internally */}
             <Feed isTutorial={false} />
             
           </div>
           
-          {/* Right Sidebar */}
+          {/* Right Sidebar - Contextual trending topics */}
           <aside className="col-span-3 hidden lg:block">
             <TrendingTopics />
           </aside>

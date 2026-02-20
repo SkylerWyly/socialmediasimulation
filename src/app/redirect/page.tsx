@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -27,8 +27,14 @@ export default function RedirectPage() {
         if (docSnap.exists()) {
           valence = docSnap.data().valenceCondition || "unknown";
         }
+        
+        // Log the final handoff for perfect admin dashboard tracking
+        await updateDoc(docRef, {
+          status: 'redirected_to_qualtrics',
+          finalHandoffAt: serverTimestamp()
+        });
       } catch (error) {
-        console.error("Error fetching condition:", error);
+        console.error("Error fetching condition or updating status:", error);
       }
 
       // 3. YOUR DUKE QUALTRICS URL
@@ -41,7 +47,7 @@ export default function RedirectPage() {
       
       // 5. Append Platform-Specific Metadata
       
-      // --- CloudResearch Connect (CRITICAL) ---
+      // --- CloudResearch Connect ---
       const projectId = localStorage.getItem('projectId');
       if (projectId) url.searchParams.append('projectId', projectId);
       
@@ -64,7 +70,9 @@ export default function RedirectPage() {
 
       // 6. Execute Redirect
       setStatus("Redirecting to Qualtrics...");
-      window.location.href = url.toString();
+      setTimeout(() => {
+        window.location.href = url.toString();
+      }, 500); // Tiny delay to ensure Firestore writes finish before navigation
     };
 
     redirectUser();

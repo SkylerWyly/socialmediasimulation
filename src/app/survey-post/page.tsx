@@ -23,7 +23,7 @@ export default function SurveyPostPage() {
   const [isSaving, setIsSaving] = useState(false);
   
   const likertQuestions = [
-    { id: 'q1-post', text: 'To what extent do you agree with the opinions expressed in the posts you saw?' },
+    { id: 'q1-post', text: 'To what extent do you agree with the opinions expressed in the comments you saw?' },
     { id: 'q2-post', text: 'How credible did you find the information presented?' },
   ];
 
@@ -68,10 +68,10 @@ export default function SurveyPostPage() {
         try {
             await updateDoc(doc(db, 'participants', participantId), {
                 surveyPost: responses,
+                status: 'survey_completed', // Added status progression
                 surveyPostCompletedAt: serverTimestamp()
             });
             
-            // --- REDIRECT UPDATE ---
             // Send user to the final redirect page which handles the Qualtrics handoff
             router.push('/redirect'); 
             
@@ -143,9 +143,12 @@ export default function SurveyPostPage() {
                 </div>
             </div>
         </CardContent>
-        <CardFooter>
-            <Button size="lg" onClick={handleContinue} disabled={isSaving}>
-                {isSaving ? "Saving..." : "Submit & Finish"}
+        <CardFooter className="flex flex-col items-center gap-4 pt-6">
+            <p className="text-sm text-muted-foreground text-center">
+              Upon submitting, you will be redirected to Qualtrics to complete the second part of the study.
+            </p>
+            <Button size="lg" className="w-full md:w-auto px-8" onClick={handleContinue} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Continue to Part 2"}
             </Button>
         </CardFooter>
       </Card>
