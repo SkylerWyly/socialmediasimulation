@@ -132,7 +132,7 @@ export default function InstructionsPage() {
               <strong>IMPORTANT:</strong> While you interact with this platform, your responses and interaction data will remain <strong>anonymous</strong> and will not be attributable to you.
             </p>
             <p>
-              Please read posts, view comments, and form your own impressions. You can like and repost any posts and the comments on each post, and even leave your own comments.
+              Please read posts, view comments (by clicking on a post or the comment icon), and form your own impressions. You can like and repost any posts and comments, and even leave your own comments.
             </p>
             
             <div className="bg-amber-500/10 border-l-4 border-amber-500 p-4 rounded-r mt-4">
