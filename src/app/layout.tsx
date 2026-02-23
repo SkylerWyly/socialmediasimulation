@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { NotificationsProvider } from '@/context/notifications-context';
 
 export const metadata: Metadata = {
-  title: 'Echo Chamber Simulator',
+  title: 'Social Media Simulator',
   description: 'A simulation of a social media feed for research purposes.',
 };
 
