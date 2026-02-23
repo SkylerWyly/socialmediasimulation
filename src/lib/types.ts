@@ -1,17 +1,17 @@
-
 export interface User {
-  id: string;
+  id?: string;
   name: string;
   username: string;
   avatar: string;
 }
 
 export interface Comment {
-  id:string;
+  id: string;
   user: User;
   content: string;
   timestamp: string;
   likes: number;
+  likesDisplay?: string; // Supports the shortened "12K" format
   replies?: Comment[];
 }
 
@@ -20,15 +20,28 @@ export interface Post {
   user: User;
   content: string;
   timestamp: string;
+  
+  // Engagement Metrics & Displays
   likes: number;
-  comments: Comment[];
+  likesDisplay?: string; 
   shares: number;
-  valence: 'sympathetic' | 'condemning' | 'neutral';
+  sharesDisplay?: string;
+  
+  // Discretized & Simulated Comments
+  comments: Comment[];
+  simulatedCommentsCount?: number;     // The underlying large Gaussian integer
+  simulatedCommentsDisplay?: string;   // The shortened display string (e.g., "452")
+  
+  // Experimental Condition & Tracking
+  valence: 'sympathetic' | 'condemning' | 'neutral' | string;
   isLikedByUser?: boolean;
   isSharedByUser?: boolean;
   isFocal?: boolean;
+  
+  // Media Support
   image?: string;
   imageHint?: string;
+  images?: string[]; // Array to support our new multi-image grid feature
 }
 
 export interface Trend {

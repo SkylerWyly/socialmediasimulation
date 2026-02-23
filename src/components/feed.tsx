@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, ClipboardCheck } from 'lucide-react';
 
 import { db } from '@/lib/firebase';
-import { doc, getDoc, updateDoc, serverTimestamp, arrayUnion } from 'firebase/firestore'; // Added arrayUnion
+import { doc, getDoc, updateDoc, serverTimestamp, arrayUnion } from 'firebase/firestore'; 
 import { FEED_CONTENT } from '@/lib/simulation-data';
 
 // --- STIMULUS METADATA ---
@@ -91,7 +92,8 @@ interface FeedProps { isTutorial?: boolean; }
 
 export function Feed({ isTutorial = false }: FeedProps) {
   const router = useRouter();
-  const [posts, setPosts] = useState<Post[]>([]);
+  // Using 'any' for Post type here to allow dynamic injection of simulated comments count
+  const [posts, setPosts] = useState<any[]>([]); 
   const [isLoading, setIsLoading] = useState(true);
   const [sectionIndex, setSectionIndex] = useState(0); 
   const [participantId, setParticipantId] = useState<string | null>(null);
@@ -106,6 +108,8 @@ export function Feed({ isTutorial = false }: FeedProps) {
             content: "I finally mastered making sun-dried tomatoes in the oven! 🍅 pasta recipe?",
             timestamp: 'Just now', likes: 124, likesDisplay: "124", shares: 18, sharesDisplay: "18",
             isLikedByUser: false, isSharedByUser: false, 
+            simulatedCommentsCount: 3, // Hardcoded for tutorial
+            simulatedCommentsDisplay: "3",
             images: ["/tutorial.png"], 
             comments: [{ id: 'tc1', user: { name: 'PastaLover', username: 'noodle_fanatic', avatar: "" }, content: "Look amazing!", timestamp: '2m', likes: 12, likesDisplay: "12", replies: [] }]
         }]);
@@ -133,8 +137,8 @@ export function Feed({ isTutorial = false }: FeedProps) {
         } catch (error) { console.error(error); }
       }
 
-      const adaptedPosts: Post[] = FEED_CONTENT.map((p) => {
-        const stats = engagementMap[p.id] || { likes: 0, likesDisplay: "0", reposts: 0, repostsDisplay: "0", comments: {} };
+      const adaptedPosts: any[] = FEED_CONTENT.map((p) => {
+        const stats = engagementMap[p.id] || { likes: 0, likesDisplay: "0", reposts: 0, repostsDisplay: "0", totalComments: 0, totalCommentsDisplay: "0", comments: {} };
         const userAction = existingInteractions[p.id] || {}; 
         const meta = STIMULUS_METADATA[p.id] || { name: `User_${p.id}`, username: `${p.id}_official`, content: p.content };
 
@@ -151,6 +155,8 @@ export function Feed({ isTutorial = false }: FeedProps) {
           timestamp: "2h ago",
           likes: stats.likes || 0, shares: stats.reposts || 0,
           likesDisplay: stats.likesDisplay || "0", sharesDisplay: stats.repostsDisplay || "0",
+          simulatedCommentsCount: stats.totalComments || rawComments.length, // Passed down to PostCard
+          simulatedCommentsDisplay: stats.totalCommentsDisplay || String(rawComments.length), // Passed down to PostCard
           isLikedByUser: userAction.liked === true,     
           isSharedByUser: userAction.reposted === true, 
           isFocal: p.type === 'real',
@@ -222,7 +228,7 @@ export function Feed({ isTutorial = false }: FeedProps) {
             key={post.id} 
             post={post} 
             onUpdatePost={() => {}} 
-            onPostComment={handlePostComment} // Pass qualitative function to PostCard
+            onPostComment={handlePostComment}
           />
         ))}
       </div>

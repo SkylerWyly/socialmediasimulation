@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { db } from '@/lib/firebase';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore'; // Added collection, getDocs
 
 // --- Utility: Shorten large numbers (e.g., 308234 -> 308K) ---
 const formatNumber = (num: number): string => {
@@ -41,7 +41,6 @@ export default function InstructionsPage() {
     if (id) {
         setParticipantId(id);
     } else {
-        // Fallback to landing if ID is missing (safety check)
         router.push('/'); 
     }
   }, [router]);
@@ -51,25 +50,60 @@ export default function InstructionsPage() {
     setIsSubmitting(true);
 
     try {
-      // Experimental condition assignment
-      const assignedValence = VALENCE_CONDITIONS[Math.floor(Math.random() * VALENCE_CONDITIONS.length)];
+      // --- QUALTRICS STYLE "EVENLY PRESENT ELEMENTS" RANDOMIZATION ---
+      let assignedValence = "neutral"; // Fallback default
+      
+      try {
+        const participantsSnap = await getDocs(collection(db, 'participants'));
+        const counts: Record<string, number> = { sympathetic: 0, condemning: 0, neutral: 0 };
+
+        participantsSnap.forEach((docSnap) => {
+          const data = docSnap.data();
+          
+          // CRITICAL: Ignore bots and dev testing IDs from the balancing counts
+          const isDev = data.participantId?.startsWith('dev_') || data.id?.startsWith('dev_');
+          
+          if (!data.isBot && !isDev && data.valenceCondition) {
+             if (counts[data.valenceCondition] !== undefined) {
+                 counts[data.valenceCondition]++;
+             }
+          }
+        });
+
+        // Find the lowest count among the conditions
+        const minCount = Math.min(counts.sympathetic, counts.condemning, counts.neutral);
+        
+        // Find all conditions that are tied for the lowest count
+        const eligibleConditions = VALENCE_CONDITIONS.filter(c => counts[c] === minCount);
+        
+        // Randomly assign from the eligible (tied) conditions
+        assignedValence = eligibleConditions[Math.floor(Math.random() * eligibleConditions.length)];
+        
+      } catch (error) {
+        console.error("Error fetching condition counts, falling back to random:", error);
+        // Pure random fallback just in case of a Firestore read error
+        assignedValence = VALENCE_CONDITIONS[Math.floor(Math.random() * VALENCE_CONDITIONS.length)];
+      }
+
+      // --- FEED GENERATION LOGIC ---
       const feedEngagement: Record<string, any> = {};
 
-      // Generate randomized engagement for all 8 posts
       for (let i = 1; i <= 8; i++) {
         const postId = `p${i}`;
         const rawLikes = generateGaussian(530000, 150000, 80000, 980000);
         const rawReposts = generateGaussian(30000, 5000, 15000, 45000);
+        const rawTotalComments = generateGaussian(400, 150, 50, 800);
         
         feedEngagement[postId] = {
           likes: rawLikes,
           likesDisplay: formatNumber(rawLikes),
           reposts: rawReposts,
           repostsDisplay: formatNumber(rawReposts),
+          totalComments: rawTotalComments, 
+          totalCommentsDisplay: formatNumber(rawTotalComments),
           comments: {} as Record<string, any>
         };
 
-        // Generate randomized engagement for 10 comments per post
         for (let j = 1; j <= 10; j++) {
             const commentId = `${postId}c${j}`;
             const cLikes = generateGaussian(7500, 2500, 0, 15000);
@@ -96,9 +130,7 @@ export default function InstructionsPage() {
         instructionsCompletedAt: serverTimestamp()
       });
 
-      // --- FIXED: RECONSTRUCT QUERY PARAMETERS ---
-      // We pull everything from localStorage to ensure PROLIFIC_PID, etc., 
-      // are passed to the tutorial and eventually back to Qualtrics.
+      // Reconstruct URL Parameters for Qualtrics Continuity
       const params = new URLSearchParams();
       const idKeys = ['id', 'PROLIFIC_PID', 'participantId', 'uid', 'STUDY_ID', 'SESSION_ID'];
       

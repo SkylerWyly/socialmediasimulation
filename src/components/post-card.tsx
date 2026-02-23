@@ -16,14 +16,12 @@ import { Separator } from './ui/separator';
 import { logEvent } from '@/lib/data-logger';
 import { cn } from '@/lib/utils'; 
 
-// --- FIREBASE IMPORTS ---
 import { db } from '@/lib/firebase';
 import { doc, updateDoc, increment, arrayUnion } from 'firebase/firestore';
 
 interface PostCardProps {
-  post: Post;
-  onUpdatePost: (post: Post) => void;
-  // Added qualitative function to prop interface
+  post: any; // Use 'any' to accommodate injected simulated values
+  onUpdatePost: (post: any) => void;
   onPostComment?: (postId: string, text: string, targetId?: string) => void;
 }
 
@@ -37,12 +35,15 @@ export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
   const [repostDisplay, setRepostDisplay] = useState(post.sharesDisplay);
 
   const [comments, setComments] = useState<CommentType[]>(post.comments);
+  // State for simulated comment count
+  const [simulatedCommentCount, setSimulatedCommentCount] = useState(post.simulatedCommentsCount || post.comments.length);
+  const [simulatedCommentDisplay, setSimulatedCommentDisplay] = useState(post.simulatedCommentsDisplay || String(post.comments.length));
+
   const [isFocusModalOpen, setIsFocusModalOpen] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
 
   const getParticipantId = () => localStorage.getItem('participantId');
 
-  // --- DwellTime & ViewedComments Tracking ---
   useEffect(() => {
     const pid = getParticipantId();
     if (isFocusModalOpen) {
@@ -119,7 +120,6 @@ export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
     }
   };
   
-  // --- UPDATED: Discretized Comment Logic ---
   const handleAddComment = (content: string) => {
     const commentToAdd: CommentType = {
       id: `comment-${Date.now()}`,
@@ -129,30 +129,36 @@ export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
       likes: 0,
       replies: [],
     };
+    
+    // Update local lists
     const updatedComments = [...comments, commentToAdd];
     setComments(updatedComments);
+    
+    // Update the simulated count so UI responds
+    const newSimCount = simulatedCommentCount + 1;
+    setSimulatedCommentCount(newSimCount);
+    if (simulatedCommentDisplay && !simulatedCommentDisplay.includes('K') && !simulatedCommentDisplay.includes('M')) {
+        setSimulatedCommentDisplay(newSimCount.toString());
+    }
+
     onUpdatePost({ ...post, comments: updatedComments });
     triggerInteraction('comment');
 
     const pid = getParticipantId();
     if (pid && db) {
-      // 1. Primary Save: Structured qualitative data object
       updateDoc(doc(db, 'participants', pid), {
         [`interactions.${post.id}.userComments`]: arrayUnion({
           text: content.trim(),
-          target: 'post', // Identifies this was a top-level reply
+          target: 'post', 
           timestamp: new Date().toISOString()
         }),
-        // 2. Secondary Save: Standard boolean flags for counts
         [`interactions.${post.id}.commented`]: true
       }).catch(e => console.error(e));
     }
 
-    // Call the optional feed-level function if passed
     onPostComment?.(post.id, content, 'post');
   };
   
-  // --- UPDATED: Discretized Reply Logic ---
   const handleAddReply = (commentId: string, content: string) => {
     const newReply: CommentType = {
         id: `reply-${Date.now()}`,
@@ -177,24 +183,29 @@ export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
 
     const updatedComments = addReplyToComment(comments);
     setComments(updatedComments);
+    
+    // Increment top-level fake counter for replies
+    const newSimCount = simulatedCommentCount + 1;
+    setSimulatedCommentCount(newSimCount);
+    if (simulatedCommentDisplay && !simulatedCommentDisplay.includes('K') && !simulatedCommentDisplay.includes('M')) {
+        setSimulatedCommentDisplay(newSimCount.toString());
+    }
+
     onUpdatePost({ ...post, comments: updatedComments });
     triggerInteraction('reply');
 
     const pid = getParticipantId();
     if (pid && db) {
-      // 1. Primary Save: Structured qualitative data object for the specific reply
       updateDoc(doc(db, 'participants', pid), {
         [`interactions.${post.id}.userComments`]: arrayUnion({
           text: content.trim(),
-          target: commentId, // Identifies exactly which comment they replied to
+          target: commentId, 
           timestamp: new Date().toISOString()
         }),
-        // 2. Secondary Save: Standard boolean flags for counts
         [`interactions.${post.id}.replied`]: true
       }).catch(e => console.error(e));
     }
 
-    // Call the optional feed-level function if passed
     onPostComment?.(post.id, content, commentId);
   };
 
@@ -202,7 +213,7 @@ export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
      <div className="flex justify-around border-t">
         <Button variant="ghost" className="flex-1 rounded-none h-12 text-muted-foreground hover:bg-accent/10 hover:text-accent" onClick={(e) => { stopPropagation(e); setIsFocusModalOpen(true); }}>
           <MessageCircle className="h-5 w-5 mr-2" />
-          {comments.length}
+          {simulatedCommentDisplay}
         </Button>
         <Button 
           variant="ghost" 
@@ -222,7 +233,8 @@ export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
       </div>
   );
 
-  const PostBody = () => (
+  // --- GLITCH FIX: Converted to a standard render function ---
+  const renderPostBody = () => (
     <div className="flex items-start gap-4">
       <Avatar><AvatarImage src={post.user.avatar} alt={post.user.name} /><AvatarFallback><UserCircle /></AvatarFallback></Avatar>
       <div className="flex-1">
@@ -251,15 +263,17 @@ export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
     </div>
   );
 
-  const FocusedView = () => (
+  // --- GLITCH FIX: Converted to a standard render function ---
+  const renderFocusedView = () => (
     <div className="p-4">
-      <PostBody />
+      {renderPostBody()}
       <div className="mt-4 flex justify-around border-t border-b py-2">
-        <div className="text-center text-sm"><span className="font-bold">{comments.length}</span> <span className="text-muted-foreground">Comments</span></div>
+        <div className="text-center text-sm"><span className="font-bold">{simulatedCommentDisplay}</span> <span className="text-muted-foreground">Comments</span></div>
         <div className="text-center text-sm"><span className="font-bold">{repostDisplay}</span> <span className="text-muted-foreground">Shares</span></div>
         <div className="text-center text-sm"><span className="font-bold">{isLiked && likeCount > post.likes ? 'Liked' : post.likesDisplay}</span> <span className="text-muted-foreground">Likes</span></div>
       </div>
       <div className="mt-4 space-y-4">
+        <p className="text-xs text-center text-muted-foreground font-semibold italic">Top Comments</p>
         <div className="space-y-4">
           {comments.map((comment) => <Comment key={comment.id} comment={comment} onAddReply={handleAddReply} />)}
         </div>
@@ -273,7 +287,7 @@ export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
     <Card className="overflow-hidden shadow-sm">
       <Dialog open={isFocusModalOpen} onOpenChange={setIsFocusModalOpen}>
         <div onClick={() => setIsFocusModalOpen(true)} className="cursor-pointer">
-          <CardContent className="p-4"><PostBody /></CardContent>
+          <CardContent className="p-4">{renderPostBody()}</CardContent>
           {interactionButtons}
         </div>
         <DialogContent className="max-w-3xl h-[90vh] flex flex-col p-0 gap-0">
@@ -281,7 +295,7 @@ export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
             <DialogTitle>{post.user.name}'s Post</DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto">
-            <FocusedView />
+            {renderFocusedView()}
           </div>
         </DialogContent>
       </Dialog>
