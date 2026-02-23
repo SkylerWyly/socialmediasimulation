@@ -1,4 +1,4 @@
-# **App Name**: Echo Chamber Simulator
+# **App Name**: Social Media Simulator
 
 ## Core Features:
 

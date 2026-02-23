@@ -156,11 +156,11 @@ export function ConsentPageContent() {
           
           <p><strong>Purpose:</strong> The purpose of this study is to understand how people interpret and respond to different situations involving other individuals.</p>
 
-          <p><strong>Procedures:</strong> In this study, you will answer some questions about yourself and decision-making and respond to different vignettes. You will also have the opportunity to interact with different social media posts. The study should take about 12 minutes to complete and you will receive compensation $2.00 for your participation. The compensation will be granted only if you complete 90% of the survey, follow directions, and submit a completion code at the end of the study.</p>
+          <p><strong>Procedures:</strong> In this study, you will answer some questions about yourself and decision-making and respond to different vignettes. You will also have the opportunity to interact with different social media posts. The study should take about 11 minutes to complete and you will receive compensation $2.00 for your participation. The compensation will be granted only if you complete 90% of the survey, follow directions, and submit a completion code at the end of the study.</p>
 
           <p><strong>Eligibility:</strong> You must be at least 18 years old and fluent in English.</p>
           
-          <p><strong>Risks and Benefits:</strong> You might find the vignettes or post content to be upsetting to you. Although this study will not benefit you personally, we hope that our results will add to current knowledge about thinking processes.</p>
+          <p><strong>Risks and Benefits:</strong> You might find the vignettes or social media post content to be upsetting to you. Although this study will not benefit you personally, we hope that our results will add to current knowledge about thinking processes.</p>
 
           <p><strong>Confidentiality:</strong> Although researchers will collect and retain your ID, we will not share your ID with others outside the research team. Data from this study will be stored securely. Any data that we publish, use for future research, or is made publicly available will not be linked to your identity.</p>
 
