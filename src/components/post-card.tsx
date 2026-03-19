@@ -247,14 +247,21 @@ export function PostCard({ post, onUpdatePost, onPostComment }: PostCardProps) {
         </div>
         <p className="mt-2 whitespace-pre-wrap">{post.content}</p>
         
+        {/* NEW UN-CROPPED IMAGE STYLING */}
         {post.images && post.images.length > 0 && (
           <div className={cn(
             "mt-3 rounded-xl border overflow-hidden grid gap-1",
             post.images.length > 1 ? "grid-cols-2" : "grid-cols-1"
           )}>
             {post.images.map((src, idx) => (
-              <div key={idx} className="relative aspect-video bg-muted">
-                <Image src={src} alt={`Post content ${idx + 1}`} fill className="object-cover" sizes="(max-width: 768px) 100vw, 600px" />
+              <div key={idx} className="relative w-full flex items-center justify-center bg-muted/20">
+                <Image 
+                  src={src} 
+                  alt={`Post content ${idx + 1}`} 
+                  width={600} 
+                  height={600} 
+                  className="w-full h-auto max-h-[600px] object-contain" 
+                />
               </div>
             ))}
           </div>
