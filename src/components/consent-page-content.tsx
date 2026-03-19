@@ -138,11 +138,11 @@ export function ConsentPageContent() {
         isHumanVerified: true 
       });
       
-      router.push(`/instructions?${searchParams.toString()}`);
+      router.push(`/survey-pre?${searchParams.toString()}`);
     } catch (error) {
       console.error("Error saving consent:", error);
       setIsSubmitting(false);
-      router.push(`/instructions?${searchParams.toString()}`);
+      router.push(`/survey-pre?${searchParams.toString()}`);
     }
   };
 
@@ -156,15 +156,17 @@ export function ConsentPageContent() {
           
           <p><strong>Purpose:</strong> The purpose of this study is to understand how people interpret and respond to different situations involving other individuals.</p>
 
-          <p><strong>Procedures:</strong> In this study, you will answer some questions about yourself and decision-making and respond to different vignettes. You will also have the opportunity to interact with different social media posts. The study should take about 11 minutes to complete and you will receive compensation $2.00 for your participation. The compensation will be granted only if you complete 90% of the survey, follow directions, and submit a completion code at the end of the study.</p>
-
+          <p><strong>Procedures:</strong> In this study, you will answer some questions about yourself and decision-making and respond to different vignettes. You will also have the opportunity to interact with different social media posts.</p>
+          
+          <p><strong>SONA:</strong> In the SONA system, 1 hour of research participation is worth 1 SONA credit and this credit is pro-rated in 30-minute increments. The duration of this study is approximately 30 minutes. In return for your participation, you will receive 0.5 SONA credits. Please note that if you do not include your SONA PIN in the online survey the researcher cannot identify you and so you will receive 0 SONA credit if you fail to correctly enter your SONA PIN in the online survey. In order to receive credit for participation you MUST be registered for this study in the SONA system.</p>
+          
           <p><strong>Eligibility:</strong> You must be at least 18 years old and fluent in English.</p>
           
           <p><strong>Risks and Benefits:</strong> You might find the vignettes or social media post content to be upsetting to you. Although this study will not benefit you personally, we hope that our results will add to current knowledge about thinking processes.</p>
 
-          <p><strong>Confidentiality:</strong> Although researchers will collect and retain your ID, we will not share your ID with others outside the research team. Data from this study will be stored securely. Any data that we publish, use for future research, or is made publicly available will not be linked to your identity.</p>
+          <p><strong>Confidentiality:</strong> Data from this study will be stored securely. Any data that we publish, use for future research, or is made publicly available will not be linked to your identity.</p>
 
-          <p><strong>Voluntary Participation:</strong> Participation in this research is voluntary. If you agree to participate, you can skip questions or cancel your participation at any time for any reason. However, if you do not answer at least 90% of the questions or follow directions, you will not receive compensation.</p>
+          <p><strong>Voluntary Participation:</strong> Participation in this research is voluntary. If you agree to participate, you can skip questions or discontinue your participation at any time, for any reason, without penalty or loss of the benefits to which you are otherwise entitled. This means that no SONA credits will be deducted from your account, nor will withdrawal have any effect on your relationship with any of your instructors.</p>
           
           <p><strong>Questions:</strong> For questions about the research, please contact James Shah at james.shah@duke.edu. For questions about your rights as a participant in this research, please contact Duke University IRB at campusirb@duke.edu. If you need to contact the Duke University IRB, please reference protocol #2025-0336.</p>
 

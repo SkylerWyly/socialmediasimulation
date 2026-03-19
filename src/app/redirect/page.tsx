@@ -38,7 +38,7 @@ export default function RedirectPage() {
       }
 
       // 3. YOUR DUKE QUALTRICS URL
-      const QUALTRICS_BASE_URL = "https://duke.qualtrics.com/jfe/form/SV_0oKzl4upn6OG5Ke";
+      const QUALTRICS_BASE_URL = "https://duke.qualtrics.com/jfe/form/SV_0UtDr0zIB5TB6HI";
       const url = new URL(QUALTRICS_BASE_URL);
       
       // 4. Append Core Data

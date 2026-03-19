@@ -158,15 +158,17 @@ export default function InstructionsPage() {
         <CardContent className="space-y-6">
           <div className="space-y-4 text-lg leading-relaxed text-foreground">
             <p>
-              In this study, you will interact with a simulated social media feed based on real posts and comments online. Your task is to <strong>browse the feed naturally</strong> as you would on your own.
+              In this study, you will interact with a simulated social media feed based on real posts and comments online about unfolding news stories.
             </p>
             <p>
-              <strong>IMPORTANT:</strong> While you interact with this platform, your responses and interaction data will remain <strong>anonymous</strong> and will not be attributable to you.
+              While you interact with this platform, your responses and interaction data will remain <strong>anonymous</strong> and will not be attributable to you.
             </p>
             <p>
-              Please read posts, view comments (by clicking on a post or the comment icon), and form your own impressions. You can like and repost any posts and comments, and even leave your own comments.
+              You can like and repost any posts and comments, and even leave your own comments.
             </p>
-            
+            <p>
+              <strong>IMPORTANT:</strong> To fully experience the social media feed, <strong>you must view each post and read the comment section</strong>. Click directly on a post or the comment icon to view comments—this is essential for completing the study and for context.
+            </p>
             <div className="bg-amber-500/10 border-l-4 border-amber-500 p-4 rounded-r mt-4">
                 <div className="flex items-start">
                     <AlertTriangle className="h-5 w-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />

@@ -6,130 +6,138 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
-import { logEvent } from '@/lib/data-logger';
+import { Loader2, AlertCircle } from 'lucide-react';
 
+// Firebase Imports
+import { db } from '@/lib/firebase';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function SurveyPrePage() {
   const router = useRouter();
   const { toast } = useToast();
+  
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const scale1Questions = [
-    { id: 's1q1', text: 'I use social media every day.' },
-    { id: 's1q2', text: 'I often get my news from social media.' },
-    { id: 's1q3', text: 'I frequently comment on or share posts I see on social media.' },
+  // --- EMOTIONALITY MEASURES ---
+  const emotionalityQuestions = [
+    { id: 'EMO_1', text: 'How morally wrong was the student\'s behavior in this situation?' },
+    { id: 'EMO_2', text: 'How strongly do you feel about individuals circumventing official channels and taking matters into their own hands?' }
   ];
 
-  const scale2Questions = [
-    { id: 's2q1', text: 'I am confident in my ability to distinguish between true and false information online.' },
-    { id: 's2q2', text: 'I believe online discussions are generally productive.' },
-    { id: 's2q3', text: 'I am concerned about the presence of "echo chambers" on social media.' },
-  ];
-  
-  const allQuestions = [...scale1Questions, ...scale2Questions];
+  const emo1Labels = ['1 - Not at all morally wrong', '2', '3', '4', '5', '6 - Extremely morally wrong'];
+  const emo2Labels = ['1 - Not at all', '2', '3', '4', '5', '6', '7 - Extremely'];
 
-  const likertLabels = [
-    'Strongly Disagree',
-    'Disagree',
-    'Neutral',
-    'Agree',
-    'Strongly Agree',
-  ];
-  
+  const allQuestions = [...emotionalityQuestions];
+
   const handleResponseChange = (questionId: string, value: string) => {
     setResponses(prev => ({ ...prev, [questionId]: value }));
-    logEvent('survey_response', {
-        page: 'survey-pre',
-        questionId: questionId,
-        response: value
-    });
   };
 
   const isFormComplete = () => {
     return allQuestions.every(q => responses[q.id]);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     setSubmitted(true);
-    if (isFormComplete()) {
-      router.push('/instructions');
-    } else {
+    
+    if (!isFormComplete()) {
       toast({
         title: "Incomplete Form",
         description: "Please answer all questions before continuing.",
         variant: "destructive",
       });
+      
+      // Scroll to the first unanswered question
+      const firstUnanswered = allQuestions.find(q => !responses[q.id]);
+      if (firstUnanswered) {
+        document.getElementById(firstUnanswered.id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    const participantId = localStorage.getItem('participantId');
+    if (participantId) {
+        setIsSaving(true);
+        try {
+            await updateDoc(doc(db, 'participants', participantId), {
+                surveyPre: responses,
+                status: 'survey_pre_completed',
+                surveyPreCompletedAt: serverTimestamp()
+            });
+            
+            router.push('/instructions'); 
+            
+        } catch (error) {
+            console.error("Error saving survey:", error);
+            setIsSaving(false);
+            toast({ title: "Error", description: "Could not save responses. Please try again." });
+        }
+    } else {
+        router.push('/instructions');
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-3xl shadow-lg">
-        <CardHeader>
-          <CardTitle>Pre-Study Survey</CardTitle>
-          <CardDescription className="text-base pt-1 text-foreground">Please answer the following questions about your habits and attitudes.</CardDescription>
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 py-8">
+      <Card className="w-full max-w-4xl shadow-lg">
+        <CardHeader className="border-b mb-6 bg-muted/30">
+          <CardTitle className="text-2xl text-primary">Scenario Evaluation</CardTitle>
+          <CardDescription className="text-base text-foreground mt-1">
+            Please read the following scenario carefully and answer the questions below.
+          </CardDescription>
         </CardHeader>
+        
         <CardContent className="space-y-8">
           
-          <div>
-            <h3 className="font-bold text-xl mb-4">Social Media Usage</h3>
-            <div className="space-y-6">
-              {scale1Questions.map((question) => (
-                <div key={question.id}>
-                  <Label className={cn("font-semibold text-lg", submitted && !responses[question.id] && "text-destructive")}>{question.text}</Label>
-                  <RadioGroup 
-                    className="mt-4"
-                    onValueChange={(value) => handleResponseChange(question.id, value)}
-                    value={responses[question.id]}
-                  >
-                    <div className="flex flex-col gap-y-4 md:flex-row md:justify-around">
-                      {likertLabels.map((label, index) => (
-                        <div key={`${question.id}-${index}`} className="flex items-center space-x-3 md:flex-col md:space-x-0 md:space-y-2 md:w-24">
-                          <RadioGroupItem value={String(index + 1)} id={`${question.id}-${index}`} className="h-5 w-5 md:h-4 md:w-4"/>
-                          <Label htmlFor={`${question.id}-${index}`} className="text-base text-center font-normal md:text-sm">{label}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
-                </div>
-              ))}
+          {/* Prominent Vignette Callout */}
+          <div className="bg-primary/5 border-l-4 border-primary p-6 rounded-r-lg shadow-sm">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+              <p className="text-lg md:text-xl font-medium italic text-foreground leading-relaxed">
+                A student believed they had been unfairly graded on multiple assignments throughout the semester. After raising concerns directly with the professor, filing a formal grade appeal with the department, and meeting with the dean of students, no changes were made and the student received no satisfactory explanation. The student then anonymously leaked the professor's upcoming final exam to other students in the class.
+              </p>
             </div>
           </div>
 
-          <Separator />
-
-          <div>
-            <h3 className="font-bold text-xl mb-4">Online Information Attitudes</h3>
-            <div className="space-y-6">
-              {scale2Questions.map((question) => (
-                <div key={question.id}>
-                  <Label className={cn("font-semibold text-lg", submitted && !responses[question.id] && "text-destructive")}>{question.text}</Label>
-                  <RadioGroup 
-                    className="mt-4"
-                    onValueChange={(value) => handleResponseChange(question.id, value)}
-                    value={responses[question.id]}
-                  >
-                    <div className="flex flex-col gap-y-4 md:flex-row md:justify-around">
-                      {likertLabels.map((label, index) => (
-                        <div key={`${question.id}-${index}`} className="flex items-center space-x-3 md:flex-col md:space-x-0 md:space-y-2 md:w-24">
-                          <RadioGroupItem value={String(index + 1)} id={`${question.id}-${index}`} className="h-5 w-5 md:h-4 md:w-4"/>
-                          <Label htmlFor={`${question.id}-${index}`} className="text-base text-center font-normal md:text-sm">{label}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
+          {/* Question 1 */}
+          <div id="EMO_1" className={cn("p-5 rounded-lg border bg-card", submitted && !responses['EMO_1'] ? "border-destructive bg-destructive/5" : "border-border")}>
+            <Label className={cn("font-semibold text-base mb-4 block", submitted && !responses['EMO_1'] && "text-destructive")}>
+              How morally wrong was the student's behavior in this situation?
+            </Label>
+            <RadioGroup onValueChange={(value) => handleResponseChange('EMO_1', value)} value={responses['EMO_1']} className="flex flex-col space-y-3 mt-4 ml-6">
+              {emo1Labels.map((label, index) => (
+                <div key={`emo1-${index}`} className="flex items-center space-x-3">
+                  <RadioGroupItem value={String(index + 1)} id={`emo1-${index}`} className="h-4 w-4" />
+                  <Label htmlFor={`emo1-${index}`} className="text-sm font-normal cursor-pointer leading-none">{label}</Label>
                 </div>
               ))}
-            </div>
+            </RadioGroup>
+          </div>
+
+          {/* Question 2 */}
+          <div id="EMO_2" className={cn("p-5 rounded-lg border bg-card", submitted && !responses['EMO_2'] ? "border-destructive bg-destructive/5" : "border-border")}>
+            <Label className={cn("font-semibold text-base mb-4 block leading-relaxed", submitted && !responses['EMO_2'] && "text-destructive")}>
+              How strongly do you feel about individuals circumventing official channels and taking matters into their own hands?
+            </Label>
+            <RadioGroup onValueChange={(value) => handleResponseChange('EMO_2', value)} value={responses['EMO_2']} className="flex flex-col space-y-3 mt-4 ml-6">
+              {emo2Labels.map((label, index) => (
+                <div key={`emo2-${index}`} className="flex items-center space-x-3">
+                  <RadioGroupItem value={String(index + 1)} id={`emo2-${index}`} className="h-4 w-4" />
+                  <Label htmlFor={`emo2-${index}`} className="text-sm font-normal cursor-pointer leading-none">{label}</Label>
+                </div>
+              ))}
+            </RadioGroup>
           </div>
           
         </CardContent>
-        <CardFooter>
-            <Button size="lg" onClick={handleContinue}>Continue to Instructions</Button>
+        <CardFooter className="flex justify-end pt-6 border-t bg-muted/20 rounded-b-lg mt-4">
+            <Button size="lg" className="w-full md:w-auto px-12" onClick={handleContinue} disabled={isSaving}>
+              {isSaving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : "Continue to Instructions"}
+            </Button>
         </CardFooter>
       </Card>
     </div>

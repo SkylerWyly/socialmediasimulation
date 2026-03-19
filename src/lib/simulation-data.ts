@@ -1,294 +1,335 @@
 export type CommentType = {
-    id: string;
-    text: string;
-    author?: string; // Optional, we can auto-generate names or use "User"
+  id: string;
+  text: string;
+  author?: string; // Optional, we can auto-generate names or use "User"
+};
+
+export type PostType = {
+  id: string;
+  type: 'real' | 'filler';
+  content: string; 
+  comments: {
+    condemning?: CommentType[];
+    supportive?: CommentType[];
+    neutral?: CommentType[];
+    filler?: CommentType[];
   };
+};
+
+export const FEED_CONTENT: PostType[] = [
+  // ==========================================
+  // ARC 1: THE CALLOUT
+  // ==========================================
   
-  export type PostType = {
-    id: string;
-    type: 'real' | 'filler';
-    content: string; // Placeholder for now, or descriptions
+  // --- POST 1 (REAL) ---
+  {
+    id: "p1",
+    type: "real",
+    content: "Breaking News: Jordan Vale Assault. Suspect fled. Motive unconfirmed.",
     comments: {
-      condemning?: CommentType[];
-      supportive?: CommentType[];
-      neutral?: CommentType[];
-      filler?: CommentType[];
-    };
-  };
-  
-  export const FEED_CONTENT: PostType[] = [
-    // --- POST 1 (REAL) ---
-    {
-      id: "p1",
-      type: "real",
-      content: "Breaking News: Robin Detska found dead.",
-      comments: {
-        condemning: [
-          { id: "p1c1", text: "All of these murders recently? Geez. What is this world coming to 🫨?" },
-          { id: "p1c2", text: "OMG! I can't believe this. I just saw him giving a talk at my college last week." },
-          { id: "p1c3", text: "RIP Robin Detska" },
-          { id: "p1c4", text: "He was one of the most brilliant minds in the field... may his legacy live on!" },
-          { id: "p1c5", text: "Didn’t he have a daughter one the way? This is devastating. God bless his wife 🙏🏽." },
-          { id: "p1c6", text: "I didn’t like him at first, but I heard him speak about a month ago at Madison Square Garden and my view on him completely changed. RIP" },
-          { id: "p1c7", text: "The person who did this is terrible." },
-          { id: "p1c8", text: "I hope the police find them and give them the death penalty." },
-          { id: "p1c9", text: "Prosecute the murderer to the fullest extent!" },
-          { id: "p1c10", text: "LONG LIVE THE TECH KING! He was my idol." }
-        ],
-        supportive: [
-          { id: "p1c1", text: "We need more of these vengeance murders honestly. I'm for it ‼️" },
-          { id: "p1c2", text: "OMG! Finally. Honestly, I expected this. I'm surprised it didn't happen last week at his talk at my college." },
-          { id: "p1c3", text: "RIH Robin Detska (rest in hell)" },
-          { id: "p1c4", text: "Why are we even giving this guy attention?" },
-          { id: "p1c5", text: "Now his family will feel the pain that many of the families that he hurt are feeling.." },
-          { id: "p1c6", text: "Fancy talks and smarts doesn't make you a good person 🧍‍♂️..." },
-          { id: "p1c7", text: "Give the person who did this the Nobel Peace prize." },
-          { id: "p1c8", text: "We should help hide the suspect lol... we should create a support group and fund them while they are on the run lol" },
-          { id: "p1c9", text: "Chill... he didn't do anything. Let them roam free." },
-          { id: "p1c10", text: "YAY HE DIED! I have always hated this guy. Top 2 on my most hated list and he wasn't 2." }
-        ],
-        neutral: [
-          { id: "p1c1", text: "I caught in the middle... I really don't know...." },
-          { id: "p1c2", text: "He just gave a talk at my college.. wow" },
-          { id: "p1c3", text: "When can we expect more updates?" },
-          { id: "p1c4", text: "Who is Robin Detska 🤷🏽?" },
-          { id: "p1c5", text: "Hawaii is a part of the US, right? lol" },
-          { id: "p1c6", text: "Do they know where in Hawaii? I hope it's not close to my house :(" },
-          { id: "p1c7", text: "Please don’t get political in this post) I personally have no opinion on him but when I heard the shot, I freaked tf out and I was running from my life" },
-          { id: "p1c8", text: "Wait I’m from Hawaii but I didn’t hear about this.." },
-          { id: "p1c9", text: "Anyone know where to find more info?" },
-          { id: "p1c10", text: "Is this real? I haven't seen this on any news outlets yet" }
-        ]
-      }
-    },
-    // --- POST 2 (FILLER) ---
-    {
-      id: "p2",
-      type: "filler",
-      content: "TGIF! Weekend vibes.",
-      comments: {
-        filler: [
-          { id: "p2c1", text: "TGIF!" },
-          { id: "p2c2", text: "My favorite day of the week!" },
-          { id: "p2c3", text: "yay 😁" },
-          { id: "p2c4", text: "Cheers!!" },
-          { id: "p2c5", text: "My favorite day with my favorite actor :)))" },
-          { id: "p2c6", text: "Freaky Friday?!?!?!?" },
-          { id: "p2c7", text: "I'm going to need a glass 🍷...." },
-          { id: "p2c8", text: "Any parties in the area???" }
-        ]
-      }
-    },
-    // --- POST 3 (REAL) ---
-    {
-      id: "p3",
-      type: "real",
-      content: "Matt detained after incident involving parents.",
-      comments: {
-        condemning: [
-          { id: "p3c1", text: "In every photo I see of of him you can see the lack of emotion in his eyes." },
-          { id: "p3c2", text: "Put him in general population and let the other inmates take care of him. Stop wasting taxpayer money on these people." },
-          { id: "p3c3", text: "He can rot and get what he deserves 🚔" },
-          { id: "p3c4", text: "Empty soul" },
-          { id: "p3c5", text: "Guillotine. He stabbed them... it's only fair" },
-          { id: "p3c6", text: "💔💔💔💔💔💔" },
-          { id: "p3c7", text: "RIP to the parents. They were known for their non-profits and their community involvement." },
-          { id: "p3c8", text: "This was SO selfish. He now has left his other siblings parentless because he couldn't express his feelings like an adult" },
-          { id: "p3c9", text: "No one, no matter what, deserves to die at the hands of their own child." },
-          { id: "p3c10", text: "This is just wrong. His parents poured everything into him and he repayed them by killing them??? Make sure that he gets the longest sentence possible" }
-        ],
-        supportive: [
-          { id: "p3c1", text: "Poor kid... has the saddest eyes.. his parents had of done something to him." },
-          { id: "p3c2", text: "He is obviously severely mentally ill. He needs special attention and rehabilitation." },
-          { id: "p3c3", text: "Free Matt 💙" },
-          { id: "p3c4", text: "There has to be more to the story... no one just has an empty soul" },
-          { id: "p3c5", text: "SSRIs can turn harmless schizophrenics into psychopaths his doctor needs to be arrested not him" },
-          { id: "p3c6", text: "He did the world a favor, give him a break. He didn't mean it 😹" },
-          { id: "p3c7", text: "Why are you guys talking about their community work??? Let's focus on what they did to their son to drive him to this point." },
-          { id: "p3c8", text: "I think this is deeper. They must have really done something to mess him up to drive him to this point 🕵🏽‍♀️." },
-          { id: "p3c9", text: "I have a friend that was close with Matt... he did what he had to do." },
-          { id: "p3c10", text: "Maybe his parents got what was coming to them? I say shorten his sentence and really get context for his act." }
-        ],
-        neutral: [
-          { id: "p3c1", text: "I'd give anything to have my parents still with me sigh" },
-          { id: "p3c2", text: "I don't think we should assume anything about this situation." },
-          { id: "p3c3", text: "I have respect and compassion for everyone in this situation. Praying for the ENTIRE family and the souls of those lost 😞." },
-          { id: "p3c4", text: "I feel like this is not the public's business, we should be giving the family time to grieve." },
-          { id: "p3c5", text: "I don't have any immediate opinions on the situation... just thinking about the other siblings." },
-          { id: "p3c6", text: "Did he give a reason why???" },
-          { id: "p3c7", text: "Who are these people??" },
-          { id: "p3c8", text: "Which news channel covered this?" },
-          { id: "p3c9", text: "Wow... this kid was in my high school class 🫣." },
-          { id: "p3c10", text: "Guys ignore this... they are just using stories like these to distract us from the real focus point... rising prices" }
-        ]
-      }
-    },
-    // --- POST 4 (FILLER) ---
-    {
-      id: "p4",
-      type: "filler",
-      content: "National Ice Cream Day",
-      comments: {
-        filler: [
-          { id: "p4c1", text: "HAPPY NAT'L ICE CREAM DAY!" },
-          { id: "p4c2", text: "I will definitely be there. I am a cookies & cream girl at heart" },
-          { id: "p4c3", text: "Ice cream meme 🍨!" },
-          { id: "p4c4", text: "Yum :)))))" },
-          { id: "p4c5", text: "Is this the new spot near the mall?" },
-          { id: "p4c6", text: "What time are you all closing???" },
-          { id: "p4c7", text: "I wish this was everyday..." },
-          { id: "p4c8", text: "They make up a new 'national day' every day... capitalism at it's finest 🙄" }
-        ]
-      }
-    },
-    // --- POST 5 (REAL) ---
-    {
-      id: "p5",
-      type: "real",
-      content: "University tuition hike protests.",
-      comments: {
-        condemning: [
-          { id: "p5c1", text: "I believe this!! My friend goes to Lakewood College and they just handled a case similar to this" },
-          { id: "p5c2", text: "15%?!! All of this to get an education.. and you still get scammed ." },
-          { id: "p5c3", text: "Barriers to education... they are trying to limit knowledge to the rich" },
-          { id: "p5c4", text: "This is horrible.. everyone should be able to access education w/o worrying about cost 💲 💲" },
-          { id: "p5c5", text: "This is hilarious. Our dean drives a BENZ but we have mold in our dorms 🤬." },
-          { id: "p5c6", text: "MY SCHOOL JUST RELEASED A STATEMENT ABOUT THIS!!! IT'S CRAZY & DESPICABLE!" },
-          { id: "p5c7", text: "I sit on a student government and can verify this. It's sad and makes me disappointed in the educational system as a whole." },
-          { id: "p5c8", text: "Eat the rich! Expose their accounts." },
-          { id: "p5c9", text: "and this is why we need the DOE.... to prevent henious acts like this" },
-          { id: "p5c10", text: "My mom has been struggling to pay tuition since freshmen year and we have taken out 4 $50,000 loans." }
-        ],
-        supportive: [
-          { id: "p5c1", text: "These reports are obviously false. They don't even name the sources.." },
-          { id: "p5c2", text: "People can't run a school for free. Everyone has to be paid." },
-          { id: "p5c3", text: "Life isn't getting cheaper.. obviously all prices/costs will be impacted." },
-          { id: "p5c4", text: "If you can't afford school... don't go 🫥" },
-          { id: "p5c5", text: "This post feels like rage bait. 'Top universities.' 99% of those kids can afford that increase." },
-          { id: "p5c6", text: "My school has said nothing about this... feels FAKE & SUS" },
-          { id: "p5c7", text: "I’m also involved in student leadership, and I haven’t seen anything to support this." },
-          { id: "p5c8", text: "I don't think we should be leaking their personal info. That's not right." },
-          { id: "p5c9", text: "You all talking about the DOE are slow... they won't help for people attending PRIVATE universities 🤡." },
-          { id: "p5c10", text: "My family hasn’t struggled with tuition at all — we planned ahead and I’ve been able to cover my costs without taking out loans." }
-        ],
-        neutral: [
-          { id: "p5c1", text: "Can we see a list of schools?" },
-          { id: "p5c2", text: "Do you guys have access to the budgets sheets/fabrications?" },
-          { id: "p5c3", text: "I'm lost? 15%? Is this a lot or standard?" },
-          { id: "p5c4", text: "We don't care.. countries are being bombed 😒" },
-          { id: "p5c5", text: "Any deans release statements?" },
-          { id: "p5c6", text: "Does anyone have a link to the official article?" },
-          { id: "p5c7", text: "... anyone remember got milk?" },
-          { id: "p5c8", text: "Can we trust campus watch? Who runs the account?" },
-          { id: "p5c9", text: "I need more details to verify" },
-          { id: "p5c10", text: "We need MORE! We can't make decisions w/ no proof." }
-        ]
-      }
-    },
-    // --- POST 6 (REAL) ---
-    {
-      id: "p6",
-      type: "real",
-      content: "True Crime / Serial Killer Update",
-      comments: {
-        condemning: [
-          { id: "p6c1", text: "HEY...SOO... THIS IS INSANE 🫣🫣????" },
-          { id: "p6c2", text: "What is the world coming to??" },
-          { id: "p6c3", text: "This kind of violence is not accpetable." },
-          { id: "p6c4", text: "The fact that some people are trying to justify what this kid did is actually scary" },
-          { id: "p6c5", text: "There are no reasons that could justify what this monster did... nothing" },
-          { id: "p6c6", text: "Psycho... psycho... psycho KiLLeR 🩸" },
-          { id: "p6c7", text: "Abuse or not, this is psychopath behavior. a murder is enough, but to go to this EXTREME indicates you should not be a member of society." },
-          { id: "p6c8", text: "Netflix making all these serial killers seem cool and got our youth doing it now" },
-          { id: "p6c9", text: "No reason for this kid to be walking on this earth. This is why we need the death penalty." },
-          { id: "p6c10", text: "Disgusting savage 🤮!!!!!!" }
-        ],
-        supportive: [
-          { id: "p6c1", text: "We all know how these stories go... the mom's bf is guilty 🤫." },
-          { id: "p6c2", text: "I don't care what anyone says... whatever the kid says the bf did... is true." },
-          { id: "p6c3", text: "The kid is the true victim. Poor thing." },
-          { id: "p6c4", text: "A lot to the story allegedly the man was beating his mom on a regular.. kid had a history of mental health issues.." },
-          { id: "p6c5", text: "I would really like to know his reasons to do so, I just think it was just nothing... this deeper than it seems" },
-          { id: "p6c6", text: "Let's not call him psycho! We don't know the back story. I can't help but feel that this child has suffered 😔" },
-          { id: "p6c7", text: "Before you go and writing bad things about this kid think about what that man put that kid through." },
-          { id: "p6c8", text: "I don’t think TV shows are “making” people do this. Most viewers understand that these stories are dramatized." },
-          { id: "p6c9", text: "I disagree. Justice should be guided by due process and public safety, not revenge or executions." },
-          { id: "p6c10", text: "A HERO 🦸🦸!!!" }
-        ],
-        neutral: [
-          { id: "p6c1", text: "Netflix series incoming 🎥..." },
-          { id: "p6c2", text: "I pray for all those who witnessed this. They will probably need counseling." },
-          { id: "p6c3", text: "Anybody get any updates?" },
-          { id: "p6c4", text: "That's enough internet for me today" },
-          { id: "p6c5", text: "Meds are no joke!" },
-          { id: "p6c6", text: "History of mental illness?" },
-          { id: "p6c7", text: "We definitely need more details" },
-          { id: "p6c8", text: "When did he get arrested?" },
-          { id: "p6c9", text: "I just opened my phone.... 😩" },
-          { id: "p6c10", text: "I see a post like this everyday" }
-        ]
-      }
-    },
-    // --- POST 7 (FILLER) ---
-    {
-      id: "p7",
-      type: "filler",
-      content: "LeBron James / Basketball",
-      comments: {
-        filler: [
-          { id: "p7c1", text: "LEBRON JAMES!!!!!" },
-          { id: "p7c2", text: "L E GOAT 🐐👑" },
-          { id: "p7c3", text: "The Suns are so trash bro...." },
-          { id: "p7c4", text: "Suns > Lakers any day just wait for the next game" },
-          { id: "p7c5", text: "Can we get content that is not just LeBron..." },
-          { id: "p7c6", text: "And 1 ⛹🏾‍♂️!" },
-          { id: "p7c7", text: "My goat keeps putting a smile on my face" },
-          { id: "p7c8", text: "Parlay hit 😌 ;)" }
-        ]
-      }
-    },
-    // --- POST 8 (REAL) ---
-    {
-      id: "p8",
-      type: "real",
-      content: "Escaped Convict / Gingerbread Man",
-      comments: {
-        condemning: [
-          { id: "p8c1", text: "SOMEONE NEEDS TO CATCH HER 😤!" },
-          { id: "p8c2", text: "nah that’s not okay. violence isn’t justified — this should go through the courts." },
-          { id: "p8c3", text: "idk, I feel like they actually are holding people accountable here. Better to wait for the facts than assume who the “real problem” is." },
-          { id: "p8c4", text: "I don’t think there’s anything hidden here. The information that’s been released seems consistent." },
-          { id: "p8c5", text: "It doesn't matter her reasoning or who it was... she STABBED people 😰" },
-          { id: "p8c6", text: "I don’t see this as a win. System failures put people at risk — accountability matters." },
-          { id: "p8c7", text: "We should be supporting the police in helping find this woman. CALL 231-458-9761" },
-          { id: "p8c8", text: "Please don’t romanticize this situation or offer support like that." },
-          { id: "p8c9", text: "Y'all need to stop talking about her looks. Looks have nothing to do with accountability." },
-          { id: "p8c10", text: "LOCK HER UP! SHE'S GUILTY 🚔🚔!!!" }
-        ],
-        supportive: [
-          { id: "p8c1", text: "RUN!!!!!!! THEY WON'T CATCH YOU... YOU'RE THE GINGERBREAD MAN 🥳" },
-          { id: "p8c2", text: "I hope that they let her roam free.. she was put away from stabbing politicians known for crimes against kids" },
-          { id: "p8c3", text: "They never punish the people that are apart of the real problem" },
-          { id: "p8c4", text: "You can call me paranoid if you want... but it’s hard not to feel like there’s a bigger system at work here 🤐." },
-          { id: "p8c5", text: "She was saving kids... she was doing it for the people.. US" },
-          { id: "p8c6", text: "You know what.. sometimes the system fails... but this oversight is a win lol" },
-          { id: "p8c7", text: "F**K THE POLICE 🚨!!!!" },
-          { id: "p8c8", text: "Let her know that my house is vacant and a warm meal is waiting for her 😊" },
-          { id: "p8c9", text: "Have y'all seen her mugshot?? She's gorgeous & not responsible for her actions whatsoever" },
-          { id: "p8c10", text: "FREE HER TILL ITS BACKWARDS !!!" }
-        ],
-        neutral: [
-          { id: "p8c1", text: "What type of violent crime??" },
-          { id: "p8c2", text: "They escaped from a high security facility? how?" },
-          { id: "p8c3", text: "Anybody get any updates?" },
-          { id: "p8c4", text: "What are the theories 📝?" },
-          { id: "p8c5", text: "I am still waiting for all the details" },
-          { id: "p8c6", text: "What's her name??" },
-          { id: "p8c7", text: "Wait when did she get arrested?" },
-          { id: "p8c8", text: "I just opened my phone....🫠" },
-          { id: "p8c9", text: "I feel like this happens everyday" },
-          { id: "p8c10", text: "Does the number work fr? I think I saw someone at the store today 😬." }
-        ]
-      }
+      condemning: [
+        { id: "p1c1", text: "Violence is NEVER the answer. I don't care what he did — this is assault and she belongs in jail." },
+        { id: "p1c2", text: "This is exactly the kind of vigilante behavior that tears society apart. Lock her up." },
+        { id: "p1c3", text: "Two wrongs don't make a right. EVER. Camille committed a crime and needs to face consequences." },
+        { id: "p1c4", text: "I am so tired of people glorifying violence. This is not justice — this is revenge." },
+        { id: "p1c5", text: "She could have gone to the police. She chose violence. That's on her." },
+        { id: "p1c6", text: "No matter what he allegedly did, physical assault is a criminal offense. Full stop." },
+        { id: "p1c7", text: "This is mob justice and it is dangerous. We have courts for a reason." },
+        { id: "p1c8", text: "Assault is assault. The victim's alleged behavior doesn't justify what she did." },
+        { id: "p1c9", text: "People like Camille think they are heroes. They are criminals." },
+        { id: "p1c10", text: "This is trial by social media and I want no part of it." }
+      ],
+      supportive: [
+        { id: "p1c1", text: "She protected her sister when no one else would. That takes more courage than most of us will ever have." },
+        { id: "p1c2", text: "The system failed Maya for eight months. Camille did what she had to do." },
+        { id: "p1c3", text: "'I would do it again without hesitation.' That is not the statement of someone who acted out of rage. That is someone who made a choice." },
+        { id: "p1c4", text: "Seven reports. SEVEN. And the platform did nothing. What was she supposed to do — file an eighth?" },
+        { id: "p1c5", text: "The comment section on every one of his videos said the same thing. Nobody is surprised. Nobody." },
+        { id: "p1c6", text: "She turned herself in immediately. She didn't run. She knew what she was doing and she owned it." },
+        { id: "p1c7", text: "Camille Reyes will be remembered. Jordan Vale will not." },
+        { id: "p1c8", text: "Maya was 17. SEVENTEEN. And he had her in his DMs for eight months." },
+        { id: "p1c9", text: "The platform knew. They had seven chances. They chose engagement over a child." },
+        { id: "p1c10", text: "I keep thinking about what Maya must have felt reading those messages. And I keep thinking about Camille reading them too." }
+      ],
+      neutral: [
+        { id: "p1c1", text: "Waiting for more information before forming an opinion on this." },
+        { id: "p1c2", text: "There are always two sides to every story. I'll reserve judgment." },
+        { id: "p1c3", text: "It's hard to know what to think without knowing all the facts." },
+        { id: "p1c4", text: "This situation is more complicated than it appears on the surface." },
+        { id: "p1c5", text: "I understand why people feel strongly about this, but I'm staying neutral." },
+        { id: "p1c6", text: "This is a developing story. Let's see what comes out before deciding." },
+        { id: "p1c7", text: "The legal system will determine what happens next." },
+        { id: "p1c8", text: "I have complicated feelings about this and I think that's okay." },
+        { id: "p1c9", text: "Not taking a side here — this is genuinely difficult." },
+        { id: "p1c10", text: "More details need to come out before any conclusions can be drawn." }
+      ]
     }
-  ];
+  },
+
+  // --- POST 2 (REAL) ---
+  {
+    id: "p2",
+    type: "real",
+    content: "Camille Reyes identified as suspect. Statement released: 'I did what I did for my sister.' Sources confirm involvement of a minor.",
+    comments: {
+      condemning: [
+        { id: "p2c1", text: "These DMs are deeply concerning if real, but we cannot just accept screenshots as proof. Anyone can fake this." },
+        { id: "p2c2", text: "Even if true, Camille had NO RIGHT to take the law into her own hands. That is not how justice works." },
+        { id: "p2c3", text: "Where is the due process? We are destroying someone's life based on leaked screenshots." },
+        { id: "p2c4", text: "I am appalled by how quickly everyone decided he was guilty. This is a witch hunt." },
+        { id: "p2c5", text: "Screenshots can be doctored. This needs proper investigation before we condemn anyone." },
+        { id: "p2c6", text: "Stop celebrating Camille. She committed a crime. Whatever he did does not erase that." },
+        { id: "p2c7", text: "People are so ready to believe the worst. Where is the presumption of innocence?" },
+        { id: "p2c8", text: "This is trial by internet. It is dangerous and it needs to stop." },
+        { id: "p2c9", text: "What happened to innocent until proven guilty? I am embarrassed by these comment sections." },
+        { id: "p2c10", text: "The mob has spoken and they've already convicted him. This is not okay." }
+      ],
+      supportive: [
+        { id: "p2c1", text: "He found a vulnerable teenager in his comment section. Read that sentence again." },
+        { id: "p2c2", text: "'Don't tell anyone we're talking.' That is a predator's sentence. That is textbook." },
+        { id: "p2c3", text: "Seven formal reports. The platform had SEVEN opportunities to protect a 17-year-old girl. They chose not to." },
+        { id: "p2c4", text: "'You're special. I've never said that to anyone else.' Every single groomer says exactly that." },
+        { id: "p2c5", text: "He had 4.2 million followers. He had all the power in that dynamic. She was 17." },
+        { id: "p2c6", text: "The platform's inaction isn't a footnote — it's the whole story." },
+        { id: "p2c7", text: "'I just want to protect you.' He said that to a teenager he was grooming. The audacity." },
+        { id: "p2c8", text: "Nobody is shocked. Go look at the comment sections on his videos from three months ago. People knew." },
+        { id: "p2c9", text: "Camille watched her 17-year-old sister get groomed for eight months while the platform sat on seven reports. Context matters." },
+        { id: "p2c10", text: "The DMs aren't shocking. They're just documented. This has always been who he was." }
+      ],
+      neutral: [
+        { id: "p2c1", text: "The authenticity of these messages has not been independently verified." },
+        { id: "p2c2", text: "These are serious allegations that deserve serious investigation." },
+        { id: "p2c3", text: "The platform's response to the reports will be an important part of this story." },
+        { id: "p2c4", text: "It's important not to jump to conclusions while this is still developing." },
+        { id: "p2c5", text: "There are legal processes in place to handle allegations like these." },
+        { id: "p2c6", text: "I think it's wise to wait for official statements before forming strong opinions." },
+        { id: "p2c7", text: "The investigation will hopefully shed light on what actually happened." },
+        { id: "p2c8", text: "Both individuals in this situation deserve fair treatment under the law." },
+        { id: "p2c9", text: "I hope everyone involved gets the support they need through this process." },
+        { id: "p2c10", text: "This case will likely raise important questions about platform responsibility." }
+      ]
+    }
+  },
+
+  // --- POST 3 (REAL) ---
+  {
+    id: "p3",
+    type: "real",
+    content: "Leaked DMs between Jordan Vale and Maya Reyes (17) revealed. Eight months of contact. Seven formal platform reports filed. No action taken.",
+    comments: {
+      condemning: [
+        { id: "p3c1", text: "This is horrifying if true. But 'if true' is doing a lot of work here. We need verification." },
+        { id: "p3c2", text: "I am not going to celebrate a violent crime because people on the internet decided he was guilty." },
+        { id: "p3c3", text: "Even if every word of this is true, it does not justify assault. We have a legal system." },
+        { id: "p3c4", text: "Screenshots prove nothing. This could be fabricated to justify what Camille did." },
+        { id: "p3c5", text: "Vigilante justice is always wrong. ALWAYS. I don't care how sympathetic the circumstances are." },
+        { id: "p3c6", text: "The people celebrating Camille are celebrating assault. Think about what that says about you." },
+        { id: "p3c7", text: "Due process exists for a reason. Social media outrage is not a legal system." },
+        { id: "p3c8", text: "I refuse to participate in mob justice no matter how bad the alleged behavior is." },
+        { id: "p3c9", text: "What Camille did was wrong. Full stop. Two wrongs do not make a right." },
+        { id: "p3c10", text: "I am disturbed by how many people think this is okay just because he might be a bad person." }
+      ],
+      supportive: [
+        { id: "p3c1", text: "He found her in a mental health comment section. She was at her most vulnerable and he targeted that." },
+        { id: "p3c2", text: "'Don't tell anyone we're talking.' That is not a sentence an innocent person says to a teenager." },
+        { id: "p3c3", text: "The platform had seven reports. SEVEN. They chose ad revenue over a child's safety. Every single time." },
+        { id: "p3c4", text: "Read those messages out loud. Every line. And then tell me you're surprised Camille did what she did." },
+        { id: "p3c5", text: "Maya was 17. He was an adult with 4.2 million followers. That power imbalance is not subtle." },
+        { id: "p3c6", text: "'I just want to protect you.' He said that to the girl he was grooming. There are no words." },
+        { id: "p3c7", text: "Seven reports. No action. A 17-year-old. This is not complicated once you have all the context." },
+        { id: "p3c8", text: "The comment sections on his videos going back months tell you everything. The public already suspected." },
+        { id: "p3c9", text: "Camille didn't snap. She filed seven reports, watched the platform ignore them, and then made a decision. That's not rage. That's grief." },
+        { id: "p3c10", text: "The girl who was failed by a platform and an algorithm now has to watch her sister go to prison. That is the real story." }
+      ],
+      neutral: [
+        { id: "p3c1", text: "The release of these messages will likely have significant legal implications." },
+        { id: "p3c2", text: "Authorities are investigating and the full picture will emerge in time." },
+        { id: "p3c3", text: "These are serious matters that deserve careful consideration by appropriate authorities." },
+        { id: "p3c4", text: "The legal system will now need to address multiple overlapping issues in this case." },
+        { id: "p3c5", text: "What happens next will depend on how law enforcement and the platform respond." },
+        { id: "p3c6", text: "This situation highlights the need for clearer policies around platform accountability." },
+        { id: "p3c7", text: "We should allow the appropriate institutions to process these events." },
+        { id: "p3c8", text: "These allegations, if substantiated, would represent serious failures at multiple levels." },
+        { id: "p3c9", text: "I expect this story will continue to develop over the coming days and weeks." },
+        { id: "p3c10", text: "This case raises important questions that go beyond the individuals involved." }
+      ]
+    }
+  },
+
+  // --- POST 4 (FILLER) ---
+  {
+    id: "p4",
+    type: "filler",
+    content: "TGIF! Weekend vibes.",
+    comments: {
+      filler: [
+        { id: "p4c1", text: "TGIF!" },
+        { id: "p4c2", text: "My favorite day of the week!" },
+        { id: "p4c3", text: "yay 😁" },
+        { id: "p4c4", text: "Cheers!!" },
+        { id: "p4c5", text: "My favorite day with my favorite actor :)))" },
+        { id: "p4c6", text: "Freaky Friday?!?!?!?" },
+        { id: "p4c7", text: "I'm going to need a glass 🍷...." },
+        { id: "p4c8", text: "Any parties in the area???" }
+      ]
+    }
+  },
+
+  // ==========================================
+  // ARC 2: THE FIRE
+  // ==========================================
+
+  // --- POST 5 (REAL) ---
+  {
+    id: "p5",
+    type: "real",
+    content: "Breaking News — House Fire, Teen Arrested. Teen, 16, arrested after setting fire to family home in Columbus OH. Mother's boyfriend hospitalized. Motive unknown.",
+    comments: {
+      condemning: [
+        { id: "p5c1", text: "Arson is a felony. A 16-year-old set a house on fire with a person inside. That is a crime and he must face consequences." },
+        { id: "p5c2", text: "I don't care what was happening in that house. You don't get to commit arson because you're angry. This is dangerous." },
+        { id: "p5c3", text: "A 16-year-old just burned down his home. Whatever the reason, that child needed intervention long before this moment." },
+        { id: "p5c4", text: "Celebrating this is celebrating a child committing a violent felony. We should be horrified, not cheering." },
+        { id: "p5c5", text: "The boyfriend is hospitalized. That is a real victim. A teenage boy put him there. That is wrong." },
+        { id: "p5c6", text: "We cannot normalize children taking violent action into their own hands. This is a failure at every level." },
+        { id: "p5c7", text: "This child needed help. Not a match. Whoever failed him deserves scrutiny — but so does what he did." },
+        { id: "p5c8", text: "I feel for this family. I do. But arson is not the answer. Ever. Full stop." },
+        { id: "p5c9", text: "People are making this boy a hero. He is a child who committed a serious crime. Both things are true." },
+        { id: "p5c10", text: "I understand the anger. I do not understand the people treating this like a victory." }
+      ],
+      supportive: [
+        { id: "p5c1", text: "Four calls to 911. Four times his mother asked for help. Four times the system did nothing. What exactly was he supposed to do." },
+        { id: "p5c2", text: "The neighbors said the police had been called more times than they could count. The whole street knew. Nobody helped." },
+        { id: "p5c3", text: "The comment section already knows what happened in that house. Read the top comments. Nobody is surprised." },
+        { id: "p5c4", text: "He protected his mom and his little sister when the adults who were supposed to protect them refused to." },
+        { id: "p5c5", text: "'Motive unknown.' Give it 24 hours. The neighborhood already knows. The internet already knows." },
+        { id: "p5c6", text: "A 16-year-old boy decided that protecting his family was worth losing his freedom. Think about what brought him to that point." },
+        { id: "p5c7", text: "The mom and the little sister were unharmed. He made sure of that. He knew exactly what he was doing." },
+        { id: "p5c8", text: "Four 911 calls. Zero arrests. Zero protection. And now everyone is shocked that the kid took matters into his own hands." },
+        { id: "p5c9", text: "NOT ONE of those comments is surprised. The neighborhood knew. The police knew. Everyone looked away." },
+        { id: "p5c10", text: "The system had four chances to protect that family. Four. It failed every single time. Marcus Webb is the consequence of that failure." }
+      ],
+      neutral: [
+        { id: "p5c1", text: "Waiting for more details before forming a strong opinion on this." },
+        { id: "p5c2", text: "There appear to be multiple layers to this story that haven't come out yet." },
+        { id: "p5c3", text: "It's important to let the investigation run its course before drawing conclusions." },
+        { id: "p5c4", text: "Both the arson and what may have led to it deserve serious attention from authorities." },
+        { id: "p5c5", text: "I think reasonable people can see this situation from very different angles." },
+        { id: "p5c6", text: "This case will likely raise important questions about how domestic abuse reports are handled." },
+        { id: "p5c7", text: "I hope the focus is on getting everyone involved the support they need." },
+        { id: "p5c8", text: "The legal proceedings will be an important place to work through what happened here." },
+        { id: "p5c9", text: "I expect this story will continue to develop significantly over the next few days." },
+        { id: "p5c10", text: "There are important systemic questions this case raises that deserve sustained attention." }
+      ]
+    }
+  },
+
+  // --- POST 6 (REAL) ---
+  {
+    id: "p6",
+    type: "real",
+    content: "Marcus Webb, 16, identified. Statement: 'I did what I had to do to protect my mom and my sister.' Leaked 911 logs show 4 calls over 14 months — zero arrests.",
+    comments: {
+      condemning: [
+        { id: "p6c1", text: "Four 911 calls are not a justification for arson. Two wrongs do not make a right. Ever." },
+        { id: "p6c2", text: "I feel deep sympathy for what this family endured. I do not feel sympathy for burning someone alive." },
+        { id: "p6c3", text: "A 16-year-old committed a violent felony. The police's failures do not erase that." },
+        { id: "p6c4", text: "We cannot build a society where children torch homes because they distrust institutions. This is the consequence of that erosion." },
+        { id: "p6c5", text: "Marcus had options. He could have told a teacher, a counselor, a relative. He chose fire." },
+        { id: "p6c6", text: "The police failures here are real and deserve accountability. So does what Marcus did." },
+        { id: "p6c7", text: "I am horrified by the 911 records. I am also horrified by the fire. Both things can be true." },
+        { id: "p6c8", text: "The boyfriend didn't personally fail to respond to those 911 calls. Marcus put him in the hospital. That is the fact." },
+        { id: "p6c9", text: "Sympathy for Marcus's situation does not make what he did legal or right. He will face real consequences." },
+        { id: "p6c10", text: "The courts will decide Marcus's guilt. That is how it should work. Not social media." }
+      ],
+      supportive: [
+        { id: "p6c1", text: "Four calls. Fourteen months. Zero arrests. The dispatch notes read like a system that had already decided not to help." },
+        { id: "p6c2", text: "'No visible injuries documented.' They wrote that. After a call where a child was heard crying. They wrote that and closed the case." },
+        { id: "p6c3", text: "He watched his mother call for help four times. He watched the police leave four times. And then he stopped waiting." },
+        { id: "p6c4", text: "'Resolved on scene.' That's what they wrote after his mother called about a physical altercation. Resolved. On. Scene." },
+        { id: "p6c5", text: "Fourteen months. Four calls. A mother who kept calling even knowing nothing would happen because she had nowhere else to turn." },
+        { id: "p6c6", text: "'Unfounded.' They called it unfounded. After his mother whispered her call because she was afraid to speak. They called it unfounded." },
+        { id: "p6c7", text: "Marcus Webb is 16 years old. He watched the adults around him fail his family for over a year. He did the only thing he thought he had left." },
+        { id: "p6c8", text: "Four calls. The last one was a whisper. She was whispering because she was afraid. They still did nothing. They still closed the case." },
+        { id: "p6c9", text: "The system told Dana Webb: call us, we'll come, nothing will change. She called four times. She learned. Marcus learned too." },
+        { id: "p6c10", text: "The dispatch notes are cold. 'Verbal dispute.' 'Resolved on scene.' 'Unfounded.' 'Separated for the evening.' Read all four and tell me the system tried." }
+      ],
+      neutral: [
+        { id: "p6c1", text: "The authenticity and context of these records will be important to verify." },
+        { id: "p6c2", text: "These records, if authentic, raise serious questions about how these calls were handled." },
+        { id: "p6c3", text: "The legal proceedings will need to address both the arson and the underlying pattern of abuse." },
+        { id: "p6c4", text: "It's worth remembering there are multiple people affected by these events who deserve care." },
+        { id: "p6c5", text: "I think most people recognize this situation is genuinely more complicated than it first appears." },
+        { id: "p6c6", text: "Both accountability threads here deserve to run their full course." },
+        { id: "p6c7", text: "The release of these records will likely accelerate calls for reform in how domestic abuse calls are handled." },
+        { id: "p6c8", text: "I hope meaningful reform comes from this, regardless of how one views the individuals involved." },
+        { id: "p6c9", text: "It's important that everyone involved receives appropriate support and due process." },
+        { id: "p6c10", text: "This story is still developing and there is much more we do not yet know." }
+      ]
+    }
+  },
+
+  // --- POST 7 (FILLER) ---
+  {
+    id: "p7",
+    type: "filler",
+    content: "National Ice Cream Day",
+    comments: {
+      filler: [
+        { id: "p7c1", text: "HAPPY NAT'L ICE CREAM DAY!" },
+        { id: "p7c2", text: "I will definitely be there. I am a cookies & cream girl at heart" },
+        { id: "p7c3", text: "Ice cream meme 🍨!" },
+        { id: "p7c4", text: "Yum :)))))" },
+        { id: "p7c5", text: "Is this the new spot near the mall?" },
+        { id: "p7c6", text: "What time are you all closing???" },
+        { id: "p7c7", text: "I wish this was everyday..." },
+        { id: "p7c8", text: "They make up a new 'national day' every day... capitalism at it's finest 🙄" }
+      ]
+    }
+  },
+
+  // --- POST 8 (REAL) ---
+  {
+    id: "p8",
+    type: "real",
+    content: "Marcus Webb formally charged with aggravated arson. Mother speaks publicly. Protesters gather outside courthouse. DA faces calls to drop charges.",
+    comments: {
+      condemning: [
+        { id: "p8c1", text: "Fifteen years is appropriate. Marcus Webb committed aggravated arson. A man was hospitalized. That is the law." },
+        { id: "p8c2", text: "I have sympathy for what this family went through. I have zero sympathy for burning someone." },
+        { id: "p8c3", text: "Arson is a crime. Juvenile facility is the consequence. This should not be controversial." },
+        { id: "p8c4", text: "I don't care about the 911 logs. I care about the rule of law. Marcus broke it." },
+        { id: "p8c5", text: "Fifteen years. Appropriate. A man was burned. A teenager is responsible. Actions have consequences." },
+        { id: "p8c6", text: "The protesters are part of the problem. They are celebrating a violent crime committed by a child." },
+        { id: "p8c7", text: "Whatever the police did or didn't do, Marcus's answer was wrong. Juvenile detention is the appropriate response." },
+        { id: "p8c8", text: "Stop making Marcus Webb a martyr. He is a child who committed a serious violent crime. Period." },
+        { id: "p8c9", text: "I hope the judge gives the appropriate sentence. We cannot excuse this behavior no matter the circumstances." },
+        { id: "p8c10", text: "The law is clear. Marcus broke it. He will face the consequences. As he should." }
+      ],
+      supportive: [
+        { id: "p8c1", text: "The DA is prosecuting a 16-year-old who protected his family because the state wouldn't. 'The System Failed First' isn't a slogan. It's a fact." },
+        { id: "p8c2", text: "Four 911 calls in 14 months. Zero arrests. Zero protection. One fire. Now everyone wants to talk about consequences." },
+        { id: "p8c3", text: "'The System Failed First.' That sign outside the courthouse is the whole story in four words." },
+        { id: "p8c4", text: "Dana Webb said 'my son protected us when no one else would.' She said it publicly, on camera, outside a courthouse. Remember that." },
+        { id: "p8c5", text: "The protesters outside have it right. The system had four chances. It failed four times. Marcus Webb is the consequence of those four failures." },
+        { id: "p8c6", text: "Marcus Webb exhausted every option available to a 16-year-old with no money and no power. There was nothing left." },
+        { id: "p8c7", text: "Dana Webb's younger daughter is safe. Marcus made sure of that. Remember her when you read about his sentencing." },
+        { id: "p8c8", text: "The officers who wrote 'unfounded' and 'resolved on scene' are watching all of this. I keep thinking about them too." },
+        { id: "p8c9", text: "Four calls. Fourteen months. One fire. The DA wants 15 years. The system that failed four times wants accountability now. The irony is not subtle." },
+        { id: "p8c10", text: "The community showed up. The mother spoke. The signs are outside the courthouse. Something is finally moving. It's too late for what Marcus lost — but something is moving." }
+      ],
+      neutral: [
+        { id: "p8c1", text: "The legal proceedings will determine appropriate consequences for all parties involved." },
+        { id: "p8c2", text: "It will be important to follow both the criminal case and any investigation into police conduct carefully." },
+        { id: "p8c3", text: "The outcomes of these proceedings could have significant implications for how domestic abuse cases are handled." },
+        { id: "p8c4", text: "Both accountability threads — Marcus's case and the police conduct — deserve to run their full course." },
+        { id: "p8c5", text: "The upcoming scrutiny of police conduct could be a significant moment for accountability." },
+        { id: "p8c6", text: "I expect this case will be cited in discussions about juvenile justice and domestic abuse response for years." },
+        { id: "p8c7", text: "The legal system is now engaged at multiple levels and that is how it should work." },
+        { id: "p8c8", text: "I hope meaningful reform comes out of this, regardless of how one views the individuals involved." },
+        { id: "p8c9", text: "These events will likely accelerate conversations about how domestic abuse and juvenile justice intersect." },
+        { id: "p8c10", text: "It remains to be seen what lasting changes, if any, will result from these proceedings." }
+      ]
+    }
+  }
+];
