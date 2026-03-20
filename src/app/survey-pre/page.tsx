@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
@@ -29,7 +29,7 @@ export default function SurveyPrePage() {
   ];
 
   const emo1Labels = ['1 - Not at all morally wrong', '2', '3', '4', '5', '6 - Extremely morally wrong'];
-  const emo2Labels = ['1 - Not at all', '2', '3', '4', '5', '6', '7 - Extremely'];
+  const emo2Labels = ['1 - Not at all', '2', '3', '4', '5', '6 - Extremely']; // UPDATED to 6-point
 
   const allQuestions = [...emotionalityQuestions];
 

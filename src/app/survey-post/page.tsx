@@ -44,7 +44,7 @@ export default function SurveyPostPage() {
     { id: 'EMO_POST_2', text: 'How strongly do you feel about individuals circumventing official channels and taking matters into their own hands?' }
   ];
   const emo1Labels = ['1 - Not at all morally wrong', '2', '3', '4', '5', '6 - Extremely morally wrong'];
-  const emo2Labels = ['1 - Not at all', '2', '3', '4', '5', '6', '7 - Extremely'];
+  const emo2Labels = ['1 - Not at all', '2', '3', '4', '5', '6 - Extremely']; // UPDATED to 6-point
 
   const allRadioQuestions = [...likertQuestions, ...blameQuestions, ...emotionalityQuestions];
 

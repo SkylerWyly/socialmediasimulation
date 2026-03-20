@@ -95,7 +95,12 @@ export default function AdminDashboard() {
     const headers = [
       "id", "PROLIFIC_PID", "STUDY_ID", "SESSION_ID", 
       "assignmentId", "projectId", "Condition", "Time_Sec", 
-      "Is_Bot", "Is_Verified", "Q1_Agree", "Q2_Credible", "Slider_Engage",
+      "Is_Bot", "Is_Verified", 
+      "Attention_Fails", "Attention_Log", // New Attention Check Metrics
+      "EMO_PRE_1", "EMO_PRE_2", // New Pre-Survey Metrics
+      "Q1_Agree", "Q2_Credible", "Slider_Engage",
+      "Blame_Camille", "Blame_Marcus", // New Blameworthiness Metrics
+      "EMO_POST_1", "EMO_POST_2", // New Post-Survey Metrics
       "Total_Real_Likes", "Total_Real_Shares", "Total_Real_CommViews", "Total_Real_DwellAvg", "User_Agent"
     ];
 
@@ -119,7 +124,7 @@ export default function AdminDashboard() {
 
       // Mapping honed IDs directly 
       const pData = [
-        p.id, // Serves as SONA 'id' and the universal document id
+        p.id, 
         p.PROLIFIC_PID || "N/A",
         p.STUDY_ID || "N/A",
         p.SESSION_ID || "N/A",
@@ -129,9 +134,17 @@ export default function AdminDashboard() {
         ((p.totalSimulationTimeMs || 0) / 1000).toFixed(2),
         p.isBot ? 1 : 0,
         p.isHumanVerified ? 1 : 0,
+        p.attentionCheckFailures || 0,
+        `"${(p.attentionCheckFailedAnswers || []).join(" | ")}"`,
+        p.surveyPre?.['EMO_1'] || "",
+        p.surveyPre?.['EMO_2'] || "",
         p.surveyPost?.['q1-post'] || "", 
         p.surveyPost?.['q2-post'] || "", 
         p.surveyPost?.['slider1-post'] || "",
+        p.surveyPost?.['blame_camille'] || "",
+        p.surveyPost?.['blame_marcus'] || "",
+        p.surveyPost?.['EMO_POST_1'] || "",
+        p.surveyPost?.['EMO_POST_2'] || "",
         rL, rS, rV, 
         rDwellCount > 0 ? (rDwellSum / rDwellCount / 1000).toFixed(2) : "0",
         `"${(p.userAgent || "Unknown").replace(/"/g, "'")}"`
@@ -168,7 +181,7 @@ export default function AdminDashboard() {
 
     // Realigned SPSS Syntax
     const spssSyntax = `GET DATA /TYPE=TXT /FILE="simulation_data.csv" /DELIMITERS="," /FIRSTCASE=2
-    /VARIABLES= id A30 PROLIFIC_PID A30 STUDY_ID A30 SESSION_ID A30 assignmentId A30 projectId A30 Condition A20 Time_Sec F8.2 Is_Bot F1.0 Is_Verified F1.0 Q1_Agree F2.0 Q2_Credible F2.0 Slider_Engage F3.0 Total_Real_Likes F4.0 Total_Real_Shares F4.0 Total_Real_CommViews F4.0 Total_Real_DwellAvg F8.2 User_Agent A200
+    /VARIABLES= id A30 PROLIFIC_PID A30 STUDY_ID A30 SESSION_ID A30 assignmentId A30 projectId A30 Condition A20 Time_Sec F8.2 Is_Bot F1.0 Is_Verified F1.0 Attention_Fails F3.0 Attention_Log A100 EMO_PRE_1 F2.0 EMO_PRE_2 F2.0 Q1_Agree F2.0 Q2_Credible F2.0 Slider_Engage F3.0 Blame_Camille F2.0 Blame_Marcus F2.0 EMO_POST_1 F2.0 EMO_POST_2 F2.0 Total_Real_Likes F4.0 Total_Real_Shares F4.0 Total_Real_CommViews F4.0 Total_Real_DwellAvg F8.2 User_Agent A200
     ${postIds.map(pid => `${pid}_L F1.0 ${pid}_S F1.0 ${pid}_V F1.0 ${pid}_D F8.2 ${pid}_Text A1000`).join(' ')}.
     VARIABLE LABELS Is_Bot 'Caught by Honeypot' Is_Verified 'Passed Consent'.
     EXECUTE.`;
